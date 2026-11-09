@@ -290,7 +290,7 @@ function MealCard({ data }) {
     [pw, setPw] = V.useState(String(initial.portion)),
     [eaten, setEaten] = V.useState(String(entry?.grams || (mode === "manual" ? 100 : product?.portion || 100))),
     [when, setWhen] = V.useState(() => ({
-      type: entry?.meal || data.meal || st.mealDraftType || mfGuessType(st.controls.clock),
+      type: entry?.meal || data.meal || mfGuessType(st.controls.clock),
       date: entry?.date || today,
       time: entry?.time || st.controls.clock,
     })),
@@ -414,7 +414,6 @@ function MealCard({ data }) {
       const e = entryPayload(N.id());
       (await N.run("diary", (s) => {
         s.entries.push(e),
-          (s.mealDraftType = null),
           (s.sheet = null),
           (s.flow = null),
           (s.tab = "stats"),
