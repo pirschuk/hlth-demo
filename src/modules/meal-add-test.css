@@ -429,139 +429,105 @@
   color: var(--swift-greyText);
 }
 
-/* ---------- 3. Плитки ---------- */
-.mt-bigtabs {
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  padding: 4px 20px 12px;
-  scrollbar-width: none;
-}
-.mt-bigtabs::-webkit-scrollbar {
-  display: none;
-}
-.mt-bigtabs button {
-  flex-shrink: 0;
-  font: 600 30px/38px SB, sans-serif;
-  color: var(--swift-greyStroke);
-  letter-spacing: -0.3px;
-}
-.mt-bigtabs button[aria-checked="true"] {
-  color: var(--swift-mainText);
-}
-.mt-widget {
-  margin: 0 16px;
-  padding: 10px;
-  border-radius: 28px;
-  background: var(--swift-divider1);
-}
-.mt-ask {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 52px;
-  padding: 0 16px;
-  border-radius: 20px;
-  background: var(--swift-white);
-  color: var(--swift-greyText);
-}
-.mt-ask input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font: var(--swift-answer1M);
-  color: var(--swift-mainText);
-}
-.mt-widget-row {
+/* ---------- 3. Плитки на DS ---------- */
+.mt-ds-header {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-.mt-widget-row button {
-  height: 64px;
-  border-radius: 20px;
-  background: var(--swift-white);
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: 40px 1fr 40px;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font: var(--swift-number3L);
-  color: var(--swift-mainText);
+  gap: 8px;
+  padding: 8px 16px 4px;
+  text-align: center;
 }
-.mt-widget-row button:active {
-  background: var(--swift-blue10);
+.phone-screen .mt-ds-header h1 {
+  margin: 0;
+}
+.mt-ds-chips {
+  margin: 12px 16px;
+  flex-wrap: nowrap;
+}
+.mt-ds-chips button {
+  flex: 1;
+  padding: 0;
+}
+.mt-tiles .ma-seg {
+  margin: 16px 16px 12px;
 }
 .mt-grid-wrap {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px 16px 28px;
+  padding: 0 16px 16px;
 }
 .mt-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
-.mt-tile {
-  position: relative;
-  min-height: 132px;
+/* [-Meal Card] meal image card (22113:138305) */
+.mt-meal-card {
+  min-height: 148px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 4px;
-  padding: 16px;
-  border-radius: 28px;
-  background: var(--bg);
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border-radius: 24px;
+  background: url(../assets/Gradient_BG3.png) center/cover;
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  text-align: center;
   color: var(--swift-mainText);
-  transition: transform 0.15s, background 0.25s;
+  transition: transform 0.15s;
 }
-.mt-tile:active {
-  transform: scale(0.96);
+.mt-meal-card.fav {
+  background: #fff url(../assets/food.edit.cardbackground.png) center/cover;
 }
-.mt-tile b {
-  font: 600 17px/22px SB, sans-serif;
+.mt-meal-card:active {
+  transform: scale(0.97);
 }
-.mt-tile span {
-  font: var(--swift-number3M);
-  color: var(--swift-secondaryText);
+.mt-meal-card:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+  outline-offset: 2px;
 }
-.mt-tile em {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.mt-meal-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  background: #fff;
-  color: var(--fg);
-  font: 400 22px/1 -apple-system, sans-serif;
-  font-style: normal;
-  transition: background 0.2s, color 0.2s;
+  margin-bottom: 4px;
+  background: var(--swift-white);
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  color: var(--swift-blue100);
 }
-.mt-tile-heart {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  font-style: normal;
-  color: var(--fg);
+.mt-meal-card-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.mt-tile.done {
-  background: var(--fg);
+.mt-meal-card-meta {
+  color: var(--swift-secondaryText);
+}
+.mt-meal-card.done {
+  box-shadow: inset 0 0 0 2px var(--swift-blue100);
+}
+.mt-meal-card.done .mt-meal-card-icon {
+  background: var(--swift-blue100);
+  box-shadow: none;
+}
+.mt-check {
   color: #fff;
+  font: 600 20px/1 -apple-system, sans-serif;
 }
-.mt-tile.done span {
-  color: #ffffffcc;
+.ma-methods.mt-methods-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.mt-tile.done em {
-  background: #fff;
-  color: var(--fg);
+.mt-meal-card.fav .mt-meal-card-name,
+.mt-meal-card.fav .mt-meal-card-meta {
+  padding: 0 6px;
+  border-radius: 8px;
+  background: #ffffffd9;
 }
 @media (prefers-reduced-motion: reduce) {
   .mt-card,

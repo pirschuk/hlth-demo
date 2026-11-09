@@ -8,9 +8,9 @@
  *   "deck"   — 2 «Карточки» (реф. Airbnb «2 of 4», Medium stack): тип приёма —
  *              заголовок со стрелками, в центре одна карточка в фокусе
  *              (камера → недавние/избранное → вручную), одна кнопка снизу;
- *   "tiles"  — 3 «Плитки» (реф. How We Feel, ChatGPT widget, Apple Music pins):
- *              крупные вкладки приёма, виджет «поиск + камера/галерея/вручную»,
- *              сетка цветных плиток блюд — касание добавляет.
+ *   "tiles"  — 3 «Плитки», доработан под DS: чипы приёма, поиск,
+ *              «Недавние / Избранное», сетка [-Meal Card], касание добавляет;
+ *              внизу [Food] Button_Add «Вручную» / «По фото» (галерея в камере).
  * Всегда: выбрал одно блюдо → добавил → вернулся к приёму с тостом.
  * ===================================================================== */
 
@@ -402,56 +402,77 @@ function MtDeck() {
   });
 }
 
-/* ================= 3. ПЛИТКИ ================= */
+/* ================= 3. ПЛИТКИ (на компонентах DS) =================
+ * [Food] Header (22926:116978) · Chip ×4 (23309:291289) · Search (19318:278360) ·
+ * SegmentedControl «Недавние / Избранное» (23461:360783) ·
+ * сетка [-Meal Card] meal image card (22113:138305): градиент — недавнее,
+ * иллюстрация + ♥ — избранное; касание добавляет блюдо ·
+ * [Food] Button_Add (23368:130470), 2 плитки: «Добавить вручную» и
+ * «Распознать по фото» (галерея — внутри камеры).
+ */
 function MtTiles() {
   const st = we(),
     when = mtWhen(st),
     saved = (p) => p.own || st.favorites.includes(p.id),
     [q, setQ] = V.useState(""),
+    [tab, setTab] = V.useState("recent"),
     [done, setDone] = V.useState(null),
-    list = q.trim() ? mtSearch(st, q.trim().toLowerCase()) : mtPool(st),
+    qq = q.trim().toLowerCase(),
+    favs = maFavorites(st),
+    list = qq
+      ? (tab === "favorites" ? favs.filter((p) => p.name.toLowerCase().includes(qq)) : mtSearch(st, qq))
+      : tab === "favorites"
+        ? favs
+        : maRecent(st),
+    keyboard = st.controls.keyboard,
     tap = (p) => {
-      setDone(p.name), setTimeout(() => mtAddOne(p, when), 380);
+      setDone(p.name), setTimeout(() => mtAddOne(p, when), 420);
     };
   return n.jsxs("div", {
     className: "mt-page mt-tiles",
     children: [
-      n.jsx("header", { className: "mt-bar", children: n.jsx(MtClose, {}) }),
+      n.jsxs("header", {
+        className: "mt-ds-header",
+        children: [
+          n.jsx(MfIconButton, { label: "Закрыть", icon: "close", size: 16, onClick: () => (mfHideKeyboard(), N.back()) }),
+          n.jsx($, { as: "h1", token: "answer1L", children: "Добавить приём пищи" }),
+          n.jsx("span", {}),
+        ],
+      }),
       n.jsx("div", {
-        className: "mt-bigtabs",
+        className: "mf-type-chips mt-ds-chips",
         role: "radiogroup",
         "aria-label": "Приём пищи",
         children: MF_TYPES.map((t) => n.jsx("button", { type: "button", role: "radio", "aria-checked": t === when.type, onClick: () => mtSetType(t), children: t }, t)),
       }),
-      n.jsxs("section", {
-        className: "mt-widget",
+      n.jsxs("label", {
+        className: "ma-search",
         children: [
-          n.jsxs("label", {
-            className: "mt-ask",
-            children: [
-              n.jsx(Q, { name: "search", size: 22 }),
-              n.jsx("input", { "aria-label": "Найти блюдо", placeholder: "Найти блюдо", value: q, onChange: (e) => setQ(e.target.value) }),
-            ],
+          n.jsx(Q, { name: "search", size: 24 }),
+          n.jsx("input", {
+            "aria-label": tab === "favorites" ? "Найти в избранном" : "Найти блюдо или продукт",
+            placeholder: tab === "favorites" ? "Найти в избранном" : "Найти блюдо или продукт",
+            value: q,
+            onChange: (e) => setQ(e.target.value),
           }),
-          n.jsx("div", {
-            className: "mt-widget-row",
-            children: [
-              ["icon.food.camera", "Камера", () => N.sheet("camera", { target: "meal" })],
-              ["gallery", "Галерея", () => N.sheet("camera", { target: "meal", gallery: !0 })],
-              ["icon.food.add_manual", "Вручную", () => N.sheet("entry", { kind: "meal", name: q.trim() })],
-            ].map(([icon, label, f]) =>
-              n.jsxs(
-                "button",
-                {
-                  type: "button",
-                  onClick: () => (mfHideKeyboard(), f()),
-                  children: [icon === "gallery" ? n.jsx(MtGalleryIcon, {}) : n.jsx(Q, { name: icon, size: 24 }), n.jsx("span", { children: label })],
-                },
-                label,
-              ),
-            ),
-          }),
+          q &&
+            n.jsx("button", {
+              type: "button",
+              "aria-label": "Очистить поиск",
+              onPointerDown: (e) => e.preventDefault(),
+              onClick: () => setQ(""),
+              children: n.jsx(Q, { name: "clear-circle", size: 20 }),
+            }),
         ],
+      }),
+      n.jsx("div", {
+        className: "mf-seg ma-seg",
+        role: "radiogroup",
+        "aria-label": "Подборка блюд",
+        children: [
+          ["recent", "Недавние"],
+          ["favorites", `Избранное${favs.length ? " · " + favs.length : ""}`],
+        ].map(([v, l]) => n.jsx("button", { type: "button", role: "radio", "aria-checked": tab === v, onClick: () => setTab(v), children: l }, v)),
       }),
       n.jsx("div", {
         className: "scroll mt-grid-wrap",
@@ -459,29 +480,56 @@ function MtTiles() {
           ? n.jsx("div", {
               className: "mt-grid",
               children: list.map((p) => {
-                const [bg, fg] = mtTint(p.name);
+                const fav = saved(p),
+                  isDone = done === p.name;
                 return n.jsxs(
                   "button",
                   {
                     type: "button",
-                    className: `mt-tile ${done === p.name ? "done" : ""}`,
-                    style: { "--bg": bg, "--fg": fg },
-                    "aria-label": `Добавить «${p.name}» в ${when.type.toLowerCase()}`,
+                    className: `mt-meal-card ${fav ? "fav" : ""} ${isDone ? "done" : ""}`,
+                    "aria-label": `Добавить «${p.name}» в ${when.type.toLowerCase()}, ${mtKcal(p)} ккал`,
                     disabled: !!done,
-                    onClick: () => tap(p),
+                    onClick: () => (mfHideKeyboard(), tap(p)),
                     children: [
-                      saved(p) && n.jsx("i", { className: "mt-tile-heart", children: "♥" }),
-                      n.jsx("b", { children: p.name }),
-                      n.jsxs("span", { children: [rt(mtKcal(p)), " ккал · ", rt(p.portion || 100), " г"] }),
-                      n.jsx("em", { "aria-hidden": "true", children: done === p.name ? "✓" : "+" }),
+                      n.jsx("span", {
+                        className: "mt-meal-card-icon",
+                        children: isDone
+                          ? n.jsx("span", { className: "mt-check", children: "✓" })
+                          : n.jsx(Q, { name: fav ? "food-heart" : "icon.food.fork_knife", size: 20 }),
+                      }),
+                      n.jsx($, { token: "answer1L", className: "mt-meal-card-name", children: p.name }),
+                      n.jsxs($, { token: "number3M", className: "mt-meal-card-meta", children: [rt(mtKcal(p)), " ккал · ", rt(p.portion || 100), " г"] }),
                     ],
                   },
                   p.id + p.name,
                 );
               }),
             })
-          : n.jsx("p", { className: "mt-none", children: "Такого нет в базе — сфотографируйте или введите вручную." }),
+          : n.jsxs("div", {
+              className: "native-catalog-empty ma-empty",
+              children: [
+                n.jsx(Q, { name: qq ? "image.food.not_found" : "food.favorites.empty", size: 120 }),
+                n.jsx("h3", { children: qq ? "Ничего не найдено" : tab === "favorites" ? "Здесь появятся ваши блюда" : "Здесь появятся последние блюда" }),
+                n.jsx("p", {
+                  children: qq
+                    ? "Распознайте блюдо по фото или добавьте вручную."
+                    : tab === "favorites"
+                      ? "Сохраняйте блюда из карточки просмотра — они будут храниться здесь."
+                      : "Добавленные блюда можно будет выбрать здесь повторно.",
+                }),
+              ],
+            }),
       }),
+      !keyboard &&
+        n.jsx("div", {
+          className: "ma-methods mt-methods-2",
+          children: [
+            ["icon.food.add_manual", "Добавить вручную", () => N.sheet("entry", { kind: "meal", name: q.trim() })],
+            ["icon.food.camera", "Распознать по фото", () => N.sheet("camera", { target: "meal" })],
+          ].map(([icon, label, f]) =>
+            n.jsxs("button", { type: "button", onClick: f, children: [n.jsx(Q, { name: icon, size: 20 }), n.jsx("span", { children: label })] }, label),
+          ),
+        }),
     ],
   });
 }
