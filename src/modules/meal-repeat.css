@@ -81,3 +81,40 @@
   gap: 12px;
   margin-top: 20px;
 }
+
+/* дата и время */
+.mr-when {
+  width: 100%;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--swift-white);
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  color: var(--swift-mainText);
+}
+.mr-when[aria-expanded="true"] {
+  box-shadow: inset 0 0 0 1px var(--swift-blue100);
+}
+.mr-when .icon {
+  transition: transform 0.2s;
+}
+.mr-drums {
+  margin-top: 8px;
+  background: var(--swift-white);
+}
+.mr-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 20px 0 12px;
+}
+.phone-screen .mr-label-row h3 {
+  margin: 0;
+}
+.mr-all {
+  color: var(--swift-blue100);
+  font: var(--swift-assastiveTextL);
+}

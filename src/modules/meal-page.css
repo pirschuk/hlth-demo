@@ -1,42 +1,66 @@
-/* Вариант «блоки приёмов → страница приёма» на DS [Meal] Widget (12670:115913).
-   Разметка и классы — как у виджета «Питание» (metric-card), здесь только отличия. */
+/* Вариант «карточки приёмов → страница приёма» по макету. Токены — DESIGN_SYSTEM.md. */
 
+/* ---------- главная ---------- */
 .mp-blocks {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
-.mp-widget {
-  margin-bottom: 0;
+/* общий виджет над карточками — без подписи, как в макете */
+.phone-screen:has(.mp-blocks) .metric-card.mini.meal .metric-title {
+  display: none;
 }
-/* вариант без цели: только значения, без полос */
-.mp-macros .macro-values {
-  margin-top: 0;
-}
-.mp-widget .metric-title {
-  position: relative;
-}
-/* «+» / «Повторить» в правом верхнем углу карточки (DS [Meal] Widget, вариант с «+») */
-.mp-corner {
-  margin-left: auto;
-  width: 32px;
-  height: 32px;
-  margin-top: -6px;
-  margin-bottom: -6px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  color: var(--swift-blue100);
+.mp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 20px 16px;
+  border-radius: 20px;
   background: var(--swift-white);
   box-shadow: inset 0 0 0 1px var(--swift-blue20);
-  font: 300 22px/1 -apple-system, sans-serif;
+  text-align: left;
+  color: var(--swift-mainText);
 }
-.mp-corner:active {
+.mp-card:active {
   background: var(--swift-blueSelectionBackground);
 }
-.mp-corner:focus-visible {
+.mp-card:focus-visible {
   outline: 2px solid var(--swift-blue100);
   outline-offset: 2px;
+}
+.mp-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mp-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  display: inline-grid;
+  place-items: center;
+  background: var(--swift-blue10);
+  color: var(--swift-blue100);
+  font: var(--swift-number3L);
+}
+.mp-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.mp-card-dots {
+  gap: 10px;
+}
+.mp-card-dots i {
+  width: 10px;
+  height: 10px;
+}
+.mp-card-kcal {
+  color: var(--swift-greyText);
+  white-space: nowrap;
 }
 
 /* ---------- страница приёма ---------- */
@@ -45,11 +69,13 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .mp-head {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
+  min-height: 56px;
   padding: 4px 8px 8px;
   text-align: center;
 }
@@ -57,22 +83,63 @@
   margin: 0;
   font: var(--swift-headline2);
 }
-.phone-screen .mp-head p {
-  margin: 2px 0 0;
-  font: var(--swift-assastiveTextM);
-  color: var(--swift-greyText);
+.mp-repeat {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--swift-blue100);
+  border-radius: 12px;
+}
+.mp-repeat:active {
+  background: var(--swift-blueSelectionBackground);
+}
+.mp-repeat:focus-visible {
+  outline: 2px solid var(--swift-blue100);
 }
 .mp-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 8px 16px 24px;
+  padding: 8px 16px 96px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
-
-/* В варианте с блоками у каждого приёма свой «+», плавающая кнопка не нужна */
-.phone-screen:has(.mp-blocks) .native-detail-add {
-  display: none;
+.mp-total {
+  background: var(--swift-white);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  padding: 16px;
+}
+.mp-total-kcal {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.mp-total-macros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.mp-total-macros > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mp-macro-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mp-macro-label i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.mp-macro-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }

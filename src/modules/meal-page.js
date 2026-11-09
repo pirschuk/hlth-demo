@@ -1,34 +1,30 @@
 /* =====================================================================
- * Вариант экрана «Приёмы пищи»: блоки приёмов → страница приёма.
- * Переключается в панели «Поведение → Экран «Приёмы пищи»»
- * (state.controls.mealList: "groups" — группы с блюдами, по умолчанию;
- *  "blocks" — этот вариант).
+ * Вариант экрана «Приёмы пищи»: карточки приёмов → страница приёма.
+ * По макету 2026-11-09 (главная + «Завтрак»). Переключается в панели
+ * «Поведение → Экран «Приёмы пищи»» (state.controls.mealList:
+ * "groups" — группы с блюдами; "blocks" — этот вариант).
  *
- *  - Главная: одна карточка, в ней строка на каждый из четырёх приёмов:
- *    название, сумма ккал, состав одной строкой, БЖУ. Пустой приём —
- *    «Нет записей» и «+».
- *  - Страница приёма (экран стека `meal-page:<Приём>`): итог ккал и БЖУ
- *    без прогресса (прогресс к норме — только в общем виджете «Питание»),
- *    список блюд, кнопка «Добавить блюдо» (сегодня) или «Повторить на
- *    сегодня» (прошлые дни).
+ *  - Главная: календарь, общий виджет «Питание», карточка на каждый приём:
+ *    название + бейдж с количеством блюд, БЖУ слева, ккал справа.
+ *    Карточка целиком открывает страницу приёма; пустой приём — сразу
+ *    добавление с выбранным типом. Плавающий «+» — общее добавление.
+ *  - Страница приёма (экран стека `meal-page:<Приём>`): заголовок,
+ *    иконка «Повторить» справа (шторка дублирования), итог ккал и БЖУ,
+ *    список блюд, плавающий «+» — добавить в этот приём.
  * ===================================================================== */
 
 var MP_PREFIX = "meal-page:";
+var MP_MACROS = [
+  ["proteins", "Белки"],
+  ["fats", "Жиры"],
+  ["carbs", "Углеводы"],
+];
 
 function mpVariant(s) {
   return s.controls.mealList ?? "groups";
 }
 function mpItems(s, meal) {
   return $f(s, "meal").filter((e) => (e.meal || "Перекус") === meal);
-}
-function mpCount(nn) {
-  const m10 = nn % 10,
-    m100 = nn % 100;
-  return `${nn} ${m10 === 1 && m100 !== 11 ? "позиция" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "позиции" : "позиций"}`;
-}
-function mpNames(items) {
-  const names = items.filter((e) => !e.recognizing && !e.recognizeError).map((e) => e.name);
-  return names.length > 1 ? `${names[0]} и ещё ${names.length - 1}` : names[0] || "";
 }
 function mpAddTo(meal) {
   N.update((s) => {
@@ -40,74 +36,7 @@ function mpOpen(meal) {
   N.go(MP_PREFIX + meal);
 }
 
-/* ---------- общий виджет приёма (DS [Meal] Widget, вариант без цели) ---------- */
-function MpMacros({ totals }) {
-  return n.jsx("div", {
-    className: "macros mp-macros",
-    children: ["proteins", "fats", "carbs"].map((k, i) =>
-      n.jsxs(
-        "div",
-        {
-          children: [
-            n.jsx($, { as: "small", className: "macro-label", token: "assastiveTextM", children: ["Белки", "Жиры", "Углеводы"][i] }),
-            n.jsxs("div", {
-              className: "macro-values",
-              children: [
-                n.jsx($, { token: "number1L", children: msG(totals[k]) }),
-                n.jsx($, { token: "answer1M", className: "macro-unit", children: "г" }),
-              ],
-            }),
-          ],
-        },
-        k,
-      ),
-    ),
-  });
-}
-function MpWidget({ meal, totals, empty, corner, actions }) {
-  return n.jsxs("section", {
-    className: `metric-card meal mp-widget ${empty ? "is-empty" : ""}`,
-    children: [
-      n.jsxs("div", {
-        className: "metric-title",
-        children: [
-          n.jsx(Q, { name: "ic.statistic.meal", size: 20 }),
-          n.jsx($, { as: "strong", token: "assastiveTextL", children: meal }),
-          corner,
-        ],
-      }),
-      empty
-        ? n.jsx("div", { className: "metric-empty", children: "Нет добавленных данных" })
-        : n.jsxs(n.Fragment, {
-            children: [
-              n.jsx("div", {
-                className: "metric-main",
-                children: n.jsxs("div", {
-                  className: "metric-value-line",
-                  children: [
-                    n.jsx($, { as: "span", token: "widget1Headline", className: "big-value", children: rt(Math.round(totals.calories)) }),
-                    n.jsx($, { token: "widget2Headline", className: "metric-goal", children: "ккал" }),
-                  ],
-                }),
-              }),
-              n.jsx(MpMacros, { totals }),
-            ],
-          }),
-      actions,
-    ],
-  });
-}
-function MpCornerButton({ label, onClick, repeat }) {
-  return n.jsx("button", {
-    type: "button",
-    className: "mp-corner",
-    "aria-label": label,
-    onClick,
-    children: repeat ? n.jsx(MrRepeatIcon, { size: 18 }) : n.jsx("span", { "aria-hidden": "true", children: "+" }),
-  });
-}
-
-/* ---------- главная: блок на каждый приём ---------- */
+/* ---------- главная: карточка на каждый приём ---------- */
 function MealBlocks() {
   const st = we();
   return n.jsx("div", {
@@ -115,30 +44,34 @@ function MealBlocks() {
     children: MF_TYPES.map((meal) => {
       const items = mpItems(st, meal),
         t = msTotals(items),
-        has = t.count > 0 || items.some((e) => e.recognizing);
-      return n.jsx(
-        MpWidget,
+        count = items.filter((e) => !e.recognizeError).length;
+      return n.jsxs(
+        "button",
         {
-          meal,
-          totals: t,
-          empty: !has,
-          actions: n.jsxs("div", {
-            className: "metric-actions",
-            children: [
-              has
-                ? n.jsxs("button", {
-                    onClick: () => mpOpen(meal),
-                    children: ["Блюда ", n.jsx("span", { children: items.length }), n.jsx(Q, { name: "chevron", size: 16 })],
-                  })
-                : n.jsx("span", {}),
-              n.jsx("button", {
-                className: "metric-add",
-                "aria-label": `Добавить в ${meal.toLowerCase()}`,
-                onClick: () => mpAddTo(meal),
-                children: n.jsx("span", { "aria-hidden": "true", children: "+" }),
-              }),
-            ],
-          }),
+          type: "button",
+          className: `mp-card ${count ? "" : "is-blank"}`,
+          onClick: () => (count ? mpOpen(meal) : mpAddTo(meal)),
+          "aria-label": count
+            ? `${meal}: ${count} ${count === 1 ? "блюдо" : count < 5 ? "блюда" : "блюд"}, ${Math.round(t.calories)} ккал`
+            : `${meal}: нет записей. Добавить`,
+          children: [
+            n.jsxs("span", {
+              className: "mp-card-title",
+              children: [
+                n.jsx($, { token: "answer0L", children: meal }),
+                count > 0 && n.jsx("span", { className: "mp-badge", children: count }),
+              ],
+            }),
+            count
+              ? n.jsxs("span", {
+                  className: "mp-card-row",
+                  children: [
+                    n.jsx(MsDots, { values: t, token: "answer1M", className: "ms-dots mp-card-dots" }),
+                    n.jsxs($, { token: "answer1M", className: "mp-card-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
+                  ],
+                })
+              : n.jsx($, { token: "answer1M", className: "mp-card-kcal", children: "Нет записей" }),
+          ],
         },
         meal,
       );
@@ -150,9 +83,7 @@ function MealBlocks() {
 function MealPage({ meal }) {
   const st = we(),
     items = mpItems(st, meal),
-    t = msTotals(items),
-    past = st.date < sl,
-    dayLabel = st.date === sl ? "Сегодня" : st.date === Jn(sl, -1) ? `Вчера, ${_p(st.date)}` : _p(st.date);
+    t = msTotals(items);
   return n.jsxs("div", {
     className: "mp-page",
     children: [
@@ -165,34 +96,70 @@ function MealPage({ meal }) {
             onClick: () => N.back(),
             children: n.jsx(Q, { name: "main.icons.chevron_left", size: 24 }),
           }),
-          n.jsxs("div", {
-            children: [n.jsx("h1", { children: meal }), n.jsx("p", { children: dayLabel })],
-          }),
-          n.jsx("span", {}),
+          n.jsx("h1", { children: meal }),
+          t.count > 0
+            ? n.jsx("button", {
+                className: "mp-repeat",
+                "aria-label": `Повторить ${meal.toLowerCase()}`,
+                onClick: () => N.sheet("meal-repeat", { date: st.date, meal }),
+                children: n.jsx(MrRepeatIcon, { size: 24 }),
+              })
+            : n.jsx("span", {}),
         ],
       }),
       n.jsxs("div", {
         className: "scroll mp-scroll",
         children: [
-          n.jsx(MpWidget, {
-            meal: "Итого",
-            totals: t,
-            empty: !t.count,
-            corner:
-              past && t.count
-                ? n.jsx(MpCornerButton, {
-                    repeat: !0,
-                    label: `Повторить ${meal.toLowerCase()} на сегодня`,
-                    onClick: () => N.sheet("meal-repeat", { date: st.date, meal }),
-                  })
-                : n.jsx(MpCornerButton, { label: `Добавить в ${meal.toLowerCase()}`, onClick: () => mpAddTo(meal) }),
+          n.jsxs("section", {
+            className: "mp-total",
+            "aria-label": `Итого: ${Math.round(t.calories)} ккал`,
+            children: [
+              n.jsxs("div", {
+                className: "mp-total-kcal",
+                children: [
+                  n.jsx($, { token: "widget1Headline", children: rt(Math.round(t.calories)) }),
+                  n.jsx($, { token: "widget2Headline", className: "ms-muted", children: "ккал" }),
+                ],
+              }),
+              n.jsx("div", {
+                className: "mp-total-macros",
+                children: MP_MACROS.map(([k, l]) =>
+                  n.jsxs(
+                    "div",
+                    {
+                      children: [
+                        n.jsxs("span", {
+                          className: "mp-macro-label",
+                          children: [n.jsx("i", { style: { background: MS_COLORS[k] } }), n.jsx($, { token: "answer1M", children: l })],
+                        }),
+                        n.jsxs("span", {
+                          className: "mp-macro-value",
+                          children: [
+                            n.jsx($, { token: "number1L", children: msG(t[k]) }),
+                            n.jsx($, { token: "answer1M", className: "ms-muted", children: "г" }),
+                          ],
+                        }),
+                      ],
+                    },
+                    k,
+                  ),
+                ),
+              }),
+            ],
           }),
-          items.length > 0 &&
-            n.jsx("div", {
-              className: "meal-history-list mp-list",
-              children: items.map((G) => n.jsx(MsMealRow, { entry: G }, G.id)),
-            }),
+          items.length
+            ? n.jsx("div", {
+                className: "meal-history-list",
+                children: items.map((G) => n.jsx(MsMealRow, { entry: G }, G.id)),
+              })
+            : n.jsx("div", { className: "card native-manual-empty", children: "Нет добавленных данных" }),
         ],
+      }),
+      n.jsx("button", {
+        className: "native-detail-add",
+        "aria-label": `Добавить в ${meal.toLowerCase()}`,
+        onClick: () => mpAddTo(meal),
+        children: "+",
       }),
     ],
   });
