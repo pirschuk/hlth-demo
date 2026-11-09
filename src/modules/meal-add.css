@@ -1,4 +1,4 @@
-/* Экран «Добавить приём пищи». Компоненты DS — см. meal-add.js. */
+/* Экран «Добавить приём пищи» — только компоненты DS (см. meal-add.js). */
 
 .ma-page {
   flex: 1;
@@ -19,12 +19,13 @@
   align-items: center;
   gap: 8px;
   height: 56px;
-  margin: 0 16px 16px;
+  margin: 0 16px;
   padding: 0 12px 0 16px;
   border-radius: 16px;
   background: var(--swift-white);
   box-shadow: inset 0 0 0 1px var(--swift-blue20);
   color: var(--swift-greyText);
+  cursor: text;
 }
 .ma-search:focus-within {
   box-shadow: inset 0 0 0 1px var(--swift-blue100);
@@ -50,25 +51,41 @@
   color: var(--swift-greyStroke);
 }
 
-/* [Food] Button_Add (23368:130470), вариант с тремя плитками */
+.ma-seg {
+  margin: 16px 16px 12px;
+}
+.ma-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+}
+.ma-empty {
+  padding: 16px 8px;
+}
+.ma-empty h3 {
+  margin: 12px 0 6px;
+}
+
+/* [Food] Button_Add (23368:130470), вариант с тремя плитками, закреплён внизу */
 .ma-methods {
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin: 0 16px;
-  padding: 12px;
-  border-radius: 24px;
+  padding: 16px 16px 34px;
+  border-radius: 24px 24px 0 0;
   background: var(--swift-blue20);
 }
 .ma-methods > button {
-  height: 92px;
+  height: 104px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   padding: 0 6px;
-  border-radius: 20px;
+  border-radius: 24px;
   background: var(--swift-white);
   color: var(--swift-mainText);
   font: var(--swift-number2L);
@@ -80,22 +97,6 @@
 .ma-methods > button:focus-visible {
   outline: 2px solid var(--swift-blue100);
   outline-offset: 2px;
-}
-
-.ma-list {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 0 16px 24px;
-}
-.ma-seg {
-  margin: 20px 0 12px;
-}
-.ma-empty {
-  padding: 24px 8px;
-}
-.ma-empty h3 {
-  margin: 12px 0 6px;
 }
 
 /* скелетон списка — [-My food] -list, состояние загрузки */
@@ -134,170 +135,4 @@
   .ma-skeleton b {
     animation: none;
   }
-}
-
-/* ---------- общее: «Как вчера?», мелкие кнопки ---------- */
-.ma-yesterday {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 16px 0 0;
-  padding: 16px;
-  border-radius: 20px;
-  background: var(--swift-blue10);
-}
-.ma-yesterday-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.ma-yesterday-copy > :nth-child(2) {
-  overflow-wrap: anywhere;
-}
-/* Button small / ghost (DS Button: 40 / r12 / Blue/20) */
-.ma-small-btn {
-  flex-shrink: 0;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--swift-blue20);
-  color: var(--swift-mainText);
-  font: var(--swift-button);
-}
-.ma-small-btn:active {
-  background: var(--swift-blue30);
-}
-.ma-small-btn:focus-visible {
-  outline: 2px solid var(--swift-blue100);
-  outline-offset: 2px;
-}
-.ma-yesterday .ma-small-btn {
-  background: var(--swift-white);
-  color: var(--swift-blue100);
-}
-.ma-caps {
-  margin: 20px 0 8px;
-  color: var(--swift-blue100);
-}
-.ma-clear {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  color: var(--swift-greyStroke);
-}
-
-/* ---------- A: поиск-герой ---------- */
-.ma-hero-search {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 72px;
-  margin: 8px 0 12px;
-  padding: 0 12px 0 20px;
-  border-radius: 24px;
-  background: var(--swift-blue10);
-  color: var(--swift-blue100);
-  box-shadow: inset 0 0 0 1.5px var(--swift-blue20);
-  cursor: text;
-}
-.ma-hero-search:focus-within {
-  background: var(--swift-white);
-  box-shadow: inset 0 0 0 1.5px var(--swift-blue100);
-}
-.ma-hero-search input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font: var(--swift-headline2);
-  color: var(--swift-mainText);
-  caret-color: var(--swift-blue100);
-}
-.ma-hero-search input::placeholder {
-  color: var(--swift-greyText);
-}
-.ma-chips {
-  display: flex;
-  gap: 8px;
-}
-.ma-chips .ma-small-btn {
-  flex: 1;
-  justify-content: center;
-  padding: 0 8px;
-}
-
-/* ---------- B: как в чате ---------- */
-.ma-chat .ma-list {
-  padding-bottom: 12px;
-}
-.ma-often-row {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin: 0 -16px;
-  padding: 2px 16px;
-  scrollbar-width: none;
-}
-.ma-often-row::-webkit-scrollbar {
-  display: none;
-}
-.ma-often-card {
-  flex: 0 0 156px;
-  min-height: 96px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 14px;
-  border-radius: 20px;
-  background: var(--swift-white);
-  box-shadow: inset 0 0 0 1px var(--swift-blue20);
-  text-align: left;
-  color: var(--swift-mainText);
-}
-.ma-often-card:active {
-  background: var(--swift-blueSelectionBackground);
-}
-.ma-often-name {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.ma-hint {
-  margin: 12px 4px 0;
-  font: var(--swift-assastiveTextM);
-  color: var(--swift-greyText);
-}
-.ma-composer {
-  margin: 0 16px 12px;
-}
-.ma-composer .ma-cam {
-  width: 56px;
-  height: 56px;
-  border-radius: 20px;
-  background: var(--swift-blue20);
-  color: var(--swift-blue100);
-  display: grid;
-  place-items: center;
-}
-.ma-composer .chat-input-container {
-  box-shadow: 0 12px 24px #0029841f, inset 0 0 0 1px var(--swift-blue20);
-}
-.ma-ai-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 20px;
-  background: var(--swift-blue10);
-  color: var(--swift-mainText);
 }
