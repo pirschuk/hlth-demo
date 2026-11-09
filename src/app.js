@@ -15346,7 +15346,8 @@ function rg({ screen: c }) {
     [f, d] = V.useState(""),
     v = c === "activity-search",
     x = c === "nutrition-own" || c === "nutrition-favorites";
-  if (c === "nutrition-add") return n.jsx(MealAddScreen, {});
+  if (c === "nutrition-add")
+    return mtVariant(o) === "ds" ? n.jsx(MealAddScreen, {}) : n.jsx(MealAddTest, {});
   if (c === "nutrition-add-legacy")
     return n.jsxs(n.Fragment, {
       children: [
@@ -17259,6 +17260,28 @@ function gg() {
                             children: "Нет данных",
                           }),
                         ],
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
+                      "Экран добавления (тест)",
+                      n.jsx("select", {
+                        "aria-label": "Экран добавления (тест)",
+                        value: c.controls.addTest ?? "ds",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.addTest = h.target.value;
+                          }),
+                        children: [
+                          ["ds", "Основной (компоненты DS)"],
+                          ["quick", "Тест 1 · Быстрый список"],
+                          ["camera", "Тест 2 · Камера первой"],
+                          ["tray", "Тест 3 · Собрать приём"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
                       }),
                     ],
                   }),
