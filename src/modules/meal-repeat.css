@@ -18,32 +18,53 @@
   outline-offset: 1px;
 }
 
+/* Шторка — DS Drawer modal (16982:333490) + Time + date wheel (22464:193357):
+   белая, скругление сверху 28, ручка над шторкой, «×» слева, заголовок Headline/2 L,
+   кнопки primary + ghost (Blue/20). */
+.sheet:has(.mr-sheet) {
+  background: var(--swift-white);
+  border-radius: 28px 28px 0 0;
+  overflow: visible;
+}
+.sheet:has(.mr-sheet) > .sheet-close {
+  display: none;
+}
+.sheet:has(.mr-sheet) > .sheet-handle {
+  top: -14px;
+  background: var(--swift-white);
+  opacity: 0.6;
+}
 .mr-sheet {
   display: flex;
   flex-direction: column;
   text-align: left;
+  padding-top: 8px;
+}
+.mr-close {
+  align-self: flex-start;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--swift-blue100);
 }
 .phone-screen .mr-sheet h2 {
-  margin: 8px 40px 4px 0;
-}
-.mr-sub {
-  display: block;
+  margin: 24px 0 0;
 }
 .phone-screen .mr-sheet .mr-label {
-  margin: 20px 0 12px;
+  margin: 24px 0 12px;
 }
 .mr-list {
-  background: var(--swift-white);
   border-radius: 20px;
   box-shadow: inset 0 0 0 1px var(--swift-blue20);
   overflow: hidden;
 }
+/* ListItem [Checkbox] (2451:22124): отступы 11/11, между 12, текст Answer/1 M */
 .mr-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 64px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   cursor: pointer;
 }
 .mr-item + .mr-item {
@@ -52,7 +73,7 @@
 .mr-item-copy {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
 }
 .mr-check {
@@ -61,8 +82,8 @@
   width: 24px;
   height: 24px;
   margin: 0;
-  border-radius: 7px;
-  box-shadow: inset 0 0 0 2px var(--swift-greyStroke);
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px var(--swift-greyStroke);
   background: var(--swift-white) center / 14px auto no-repeat;
   cursor: pointer;
 }
@@ -70,6 +91,10 @@
   box-shadow: none;
   background-color: var(--swift-blue100);
   background-image: url(../assets/ds.checkbox.mark2.png);
+}
+.mr-check:disabled {
+  box-shadow: none;
+  background-color: var(--swift-greyText);
 }
 .mr-check:focus-visible {
   outline: 2px solid var(--swift-blue100);
@@ -79,42 +104,24 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 24px;
 }
-
-/* дата и время */
-.mr-when {
-  width: 100%;
-  height: 56px;
-  padding: 0 16px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--swift-white);
-  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+.mr-footer .mf-summary {
+  padding: 0 8px;
+}
+.app-button.mr-ghost {
+  background: var(--swift-blue20);
   color: var(--swift-mainText);
 }
-.mr-when[aria-expanded="true"] {
-  box-shadow: inset 0 0 0 1px var(--swift-blue100);
+.app-button.mr-ghost:active {
+  background: var(--swift-blue30);
 }
-.mr-when .icon {
-  transition: transform 0.2s;
+.sheet:has(.mr-sheet) {
+  padding-top: 0;
 }
-.mr-drums {
-  margin-top: 8px;
-  background: var(--swift-white);
+.sheet:has(.mr-sheet) > .sheet-scroll {
+  padding: 20px 16px 34px;
 }
-.mr-label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 20px 0 12px;
-}
-.phone-screen .mr-label-row h3 {
-  margin: 0;
-}
-.mr-all {
-  color: var(--swift-blue100);
-  font: var(--swift-assastiveTextL);
+.sheet:has(.mr-sheet) .mr-sheet {
+  padding-top: 0;
 }

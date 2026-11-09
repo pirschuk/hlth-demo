@@ -385,24 +385,28 @@
 .mf-type-chips button[aria-checked="true"] {
   box-shadow: inset 0 0 0 1.5px var(--swift-blue100);
 }
+/* Барабан — DS [-CardMeal] Time + date wheel (22464:193357):
+   строки 44, видно 5 (220), полоса выбора 44 Grayscale/10, карточка с обводкой Blue/20,
+   цифры Number/18 L, невыбранные — серые. */
 .mf-drums {
   position: relative;
   display: flex;
-  gap: 4px;
-  height: 200px;
-  border-radius: 16px;
+  gap: 0;
+  height: 220px;
+  border-radius: 20px;
+  background: var(--swift-white);
   box-shadow: inset 0 0 0 1px var(--swift-blue20);
   padding: 0 8px;
   overflow: hidden;
 }
 .mf-drum-band {
   position: absolute;
-  left: 8px;
-  right: 8px;
-  top: 80px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--swift-blue10);
+  left: 16px;
+  right: 16px;
+  top: 88px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--swift-divider1);
   pointer-events: none;
 }
 .mf-drum {
@@ -412,32 +416,31 @@
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   scrollbar-width: none;
-  padding: 80px 0;
+  padding: 88px 0;
   outline: 0;
-  -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
-  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+  -webkit-mask-image: linear-gradient(transparent, #000 40%, #000 60%, transparent);
+  mask-image: linear-gradient(transparent, #000 40%, #000 60%, transparent);
 }
 .mf-drum::-webkit-scrollbar {
   display: none;
 }
 .mf-drum > div {
-  height: 40px;
+  height: 44px;
   scroll-snap-align: start;
   display: flex;
   align-items: center;
   justify-content: center;
-  font: var(--swift-answer1M);
+  font: 600 18px/25.2px SB, sans-serif;
   color: var(--swift-greyText);
   cursor: pointer;
   white-space: nowrap;
 }
 .mf-drum > div.selected {
-  font: var(--swift-answer1L);
   color: var(--swift-mainText);
 }
 .mf-drum:focus-visible {
   box-shadow: inset 0 0 0 2px var(--swift-blue100);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 .mf-text-btn {
   height: 44px;

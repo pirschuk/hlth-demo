@@ -160,7 +160,7 @@ function MfField({ id, label, icon, unit, value, invalid, onChange, onFocus, onB
 function MfDrum({ items, value, onChange, label, width }) {
   const ref = V.useRef(null),
     timer = V.useRef(0),
-    H = 40,
+    H = 44,
     idx = Math.max(0, items.findIndex((i) => i.value === value));
   V.useLayoutEffect(() => {
     ref.current && (ref.current.scrollTop = idx * H);

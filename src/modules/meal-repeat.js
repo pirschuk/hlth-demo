@@ -50,7 +50,6 @@ function MealRepeatSheet({ data }) {
     [date, setDate] = V.useState(sl),
     [hh, setH] = V.useState(st.controls.clock.slice(0, 2)),
     [mm, setM] = V.useState(st.controls.clock.slice(3, 5)),
-    [pickTime, setPickTime] = V.useState(!1),
     chosen = items.filter((e) => picked.includes(e.id)),
     t = msTotals(chosen),
     busy = st.pending.includes("diary"),
@@ -58,7 +57,6 @@ function MealRepeatSheet({ data }) {
     days = Array.from({ length: 14 }, (_, i) => Jn(sl, i - 13)).map((d) => ({ value: d, label: mfDayLabel(d, sl, !0) })),
     hours = Array.from({ length: 24 }, (_, i) => ({ value: pad(i), label: pad(i) })),
     mins = Array.from({ length: 60 }, (_, i) => ({ value: pad(i), label: pad(i) })),
-    allOn = picked.length === items.length,
     toggle = (id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id])),
     submit = async () => {
       if (!chosen.length) return;
@@ -79,8 +77,14 @@ function MealRepeatSheet({ data }) {
   return n.jsxs("div", {
     className: "mr-sheet",
     children: [
+      n.jsx("button", {
+        type: "button",
+        className: "mr-close",
+        "aria-label": "Закрыть",
+        onClick: () => N.back(),
+        children: n.jsx(Q, { name: "close", size: 18 }),
+      }),
       n.jsx($, { as: "h2", token: "headline2", children: `Повторить ${data.meal.toLowerCase()}` }),
-      n.jsx($, { token: "assastiveTextM", className: "ms-muted mr-sub", children: `из записи за ${mrWhenLabel(data.date, items[0]?.time || "").replace(/, $/, "").toLowerCase()}` }),
 
       n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Тип приёма" }),
       n.jsx("div", {
@@ -92,42 +96,22 @@ function MealRepeatSheet({ data }) {
         ),
       }),
 
-      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Дата и время" }),
-      n.jsxs("button", {
-        type: "button",
-        className: "mr-when",
-        "aria-expanded": pickTime,
-        onClick: () => setPickTime(!pickTime),
-        children: [
-          n.jsx($, { token: "answer1M", children: mrWhenLabel(date, `${hh}:${mm}`) }),
-          n.jsx(Q, { name: "icon.chevron.down", size: 12, className: pickTime ? "mf-rot" : "" }),
-        ],
-      }),
-      pickTime &&
-        n.jsxs("div", {
-          className: "mf-drums mr-drums",
-          children: [
-            n.jsx("i", { className: "mf-drum-band", "aria-hidden": "true" }),
-            n.jsx(MfDrum, { label: "День", items: days, value: date, onChange: setDate }),
-            n.jsx(MfDrum, { label: "Часы", items: hours, value: hh, onChange: setH, width: 56 }),
-            n.jsx(MfDrum, { label: "Минуты", items: mins, value: mm, onChange: setM, width: 56 }),
-          ],
-        }),
-
+      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Время приёма" }),
       n.jsxs("div", {
-        className: "mr-label-row",
+        className: "mf-drums",
         children: [
-          n.jsx($, { as: "h3", token: "answer1L", children: "Блюда" }),
-          n.jsx("button", {
-            type: "button",
-            className: "mr-all",
-            onClick: () => setPicked(allOn ? [] : items.map((e) => e.id)),
-            children: allOn ? "Снять все" : "Выбрать все",
-          }),
+          n.jsx("i", { className: "mf-drum-band", "aria-hidden": "true" }),
+          n.jsx(MfDrum, { label: "День", items: days, value: date, onChange: setDate }),
+          n.jsx(MfDrum, { label: "Часы", items: hours, value: hh, onChange: setH, width: 56 }),
+          n.jsx(MfDrum, { label: "Минуты", items: mins, value: mm, onChange: setM, width: 56 }),
         ],
       }),
+
+      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Блюда" }),
       n.jsx("div", {
         className: "mr-list",
+        role: "group",
+        "aria-label": "Блюда для повтора",
         children: items.map((e) =>
           n.jsxs(
             "label",
@@ -138,7 +122,7 @@ function MealRepeatSheet({ data }) {
                 n.jsxs("span", {
                   className: "mr-item-copy",
                   children: [
-                    n.jsx($, { token: "assastiveTextL", children: e.name }),
+                    n.jsx($, { token: "answer1M", children: e.name }),
                     n.jsx($, {
                       token: "number3M",
                       className: "ms-muted",
@@ -162,6 +146,7 @@ function MealRepeatSheet({ data }) {
             onClick: () => void submit(),
             children: chosen.length ? `Добавить в ${type.toLowerCase()}` : "Выберите блюда",
           }),
+          n.jsx(re, { className: "mr-ghost", onClick: () => N.back(), children: "Отменить" }),
         ],
       }),
     ],
