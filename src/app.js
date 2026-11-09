@@ -12356,6 +12356,38 @@ function ds(c = "filled") {
           meal: "Завтрак",
           provider: "manual",
         },
+        ...(d === 0
+          ? [
+              {
+                id: "meal-egg-0",
+                kind: "meal",
+                date: v,
+                time: "09:30",
+                name: "Яйцо варёное",
+                value: 78,
+                proteins: 6.5,
+                fats: 5.3,
+                carbs: 0.6,
+                grams: 55,
+                meal: "Завтрак",
+                provider: "manual",
+              },
+              {
+                id: "meal-banana-0",
+                kind: "meal",
+                date: v,
+                time: "09:35",
+                name: "Банан",
+                value: 107,
+                proteins: 1.3,
+                fats: 0.4,
+                carbs: 27.5,
+                grams: 120,
+                meal: "Завтрак",
+                provider: "manual",
+              },
+            ]
+          : []),
         {
           id: `lunch-${d}`,
           kind: "meal",
@@ -15605,7 +15637,10 @@ function rg({ screen: c }) {
 }
 function nh(c) {
   c === "meal"
-    ? N.go("nutrition-add", "stats")
+    ? (N.update((o) => {
+        o.mealDraftType = null;
+      }),
+      N.go("nutrition-add", "stats"))
     : c === "activity"
       ? N.go("activity-search", "stats")
       : N.sheet("entry", { kind: c });
@@ -16137,7 +16172,9 @@ function fg({ screen: c }) {
               n.jsx(_u, { kind: j, compact: !0 }),
             k.length
               ? g.map((w) =>
-                  j === "meal"
+                  j === "meal" && msVariant(o) !== "off"
+                    ? n.jsx(MealGroup, { name: w.name, items: w.items }, w.name)
+                    : j === "meal"
                     ? n.jsxs(
                         "section",
                         {
@@ -17217,6 +17254,27 @@ function gg() {
                             children: "Нет данных",
                           }),
                         ],
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
+                      "Итог приёма пищи",
+                      n.jsx("select", {
+                        "aria-label": "Итог приёма пищи",
+                        value: c.controls.mealSummary ?? "header",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.mealSummary = h.target.value;
+                          }),
+                        children: [
+                          ["header", "A · строка в шапке группы"],
+                          ["card", "B · карточка приёма и экран"],
+                          ["off", "Без итога (как было)"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
                       }),
                     ],
                   }),
@@ -18727,7 +18785,7 @@ function bg() {
       c.sheet.data?.target === "meal",
     o =
       mfCamera ||
-      ["product", "activity-card"].includes(c.sheet.kind) ||
+      ["product", "activity-card", "meal-summary"].includes(c.sheet.kind) ||
       (c.sheet.kind === "entry" &&
         ["meal", "activity"].includes(c.sheet.data?.kind)),
     f = c.sheet.kind === "entry" && !o;
@@ -18780,6 +18838,8 @@ function xg({ kind: c, data: o }) {
       return n.jsx(MealCard, { data: o });
     case "meal-recognition-info":
       return n.jsx(MealRecognitionInfo, {});
+    case "meal-summary":
+      return n.jsx(MealSummaryScreen, { data: o });
     case "own-editor":
       return n.jsx(og, { data: o });
     case "activity-card":

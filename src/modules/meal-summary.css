@@ -1,0 +1,205 @@
+/* Итог по приёму пищи: варианты A и B + экран приёма. Токены — DESIGN_SYSTEM.md. */
+
+.ms-muted {
+  color: var(--swift-greyText);
+}
+.ms-dots {
+  display: flex;
+  gap: 12px;
+}
+.ms-dots > span {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.ms-dots i,
+.ms-bar-label i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ---------- A: итог в шапке группы ---------- */
+.ms-a-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 16px 8px;
+}
+.phone-screen .ms-a-head h3 {
+  margin: 0;
+  color: var(--swift-blue100);
+}
+.ms-a-kcal {
+  color: var(--swift-mainText);
+}
+.ms-a-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  background: var(--swift-blue10);
+  box-shadow: inset 0 -1px var(--swift-blue20);
+}
+.ms-a-count {
+  color: var(--swift-secondaryText);
+}
+.ms-a .ms-a-summary + .meal-history-row {
+  box-shadow: none;
+}
+
+/* ---------- B: карточка приёма ---------- */
+.ms-b .meal-history-list {
+  overflow: hidden;
+}
+.ms-b-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+  text-align: left;
+}
+.ms-b-head:active {
+  background: var(--swift-blueSelectionBackground);
+}
+.ms-b-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.ms-b-kcal {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.ms-b-kcal .icon,
+.ms-b-kcal .symbol {
+  align-self: center;
+  margin-left: 4px;
+  color: var(--swift-greyChevron);
+}
+.ms-b-dots {
+  padding: 0 16px 12px;
+  box-shadow: inset 0 -1px var(--swift-blue20);
+}
+.ms-b .ms-b-dots + .meal-history-row,
+.ms-b .ms-b-head + .meal-history-row {
+  box-shadow: inset 0 1px var(--swift-blue20);
+}
+.ms-b-add {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--swift-blue100);
+  font: var(--swift-assastiveTextL);
+  box-shadow: inset 0 1px var(--swift-blue20);
+}
+.ms-b-add .sf-symbol {
+  color: var(--swift-blue100);
+}
+
+/* ---------- экран приёма пищи ---------- */
+.ms-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: url(../assets/Gradient_BG3.png) center/cover;
+}
+.ms-screen-head {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  text-align: center;
+}
+.ms-screen-head h1 {
+  margin: 0;
+}
+.ms-screen-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 16px 24px;
+}
+.ms-total-card {
+  background: var(--swift-white);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ms-total-kcal {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.ms-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--swift-blue20);
+  overflow: hidden;
+}
+.ms-bar.big {
+  height: 8px;
+  border-radius: 4px;
+}
+.ms-bar b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--swift-blue100);
+}
+.ms-bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+.ms-bars > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ms-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ms-bars small {
+  font: var(--swift-number2M);
+  color: var(--swift-greyText);
+}
+.phone-screen .ms-list-title {
+  margin: 20px 16px 8px;
+  color: var(--swift-blue100);
+}
+.ms-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--swift-greyText);
+  font: var(--swift-assastiveTextM);
+}
+.ms-screen-footer {
+  padding: 12px 16px 24px;
+}
+.ms-bar.over b {
+  background: var(--figma-optioinal-warning, #f17c59);
+}
+.ms-over-text {
+  color: #c4502c;
+}
