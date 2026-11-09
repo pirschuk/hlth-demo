@@ -470,3 +470,74 @@
 .mt-tray .mt-btn.primary {
   width: 100%;
 }
+
+/* 3. шторка подтверждения одного блюда */
+.mt-chevron {
+  margin-left: auto;
+  color: var(--swift-greyChevron);
+  font-size: 24px;
+}
+.mt-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: #0006;
+  display: flex;
+  align-items: flex-end;
+  animation: mf-fade 0.2s;
+}
+.mt-confirm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 16px 28px;
+  border-radius: 28px 28px 0 0;
+  background: var(--swift-white);
+  animation: mf-up 0.25s ease-out;
+}
+.mt-grab {
+  align-self: center;
+  width: 36px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--swift-greyStroke);
+  margin-bottom: 6px;
+}
+.phone-screen .mt-confirm h2 {
+  margin: 0;
+}
+.mt-confirm-kcal {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mt-confirm-dots {
+  margin-left: auto;
+}
+.mt-portion {
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--swift-blue10);
+}
+.mt-portion button {
+  height: 64px;
+  font: 300 30px/1 -apple-system, sans-serif;
+  color: var(--swift-blue100);
+}
+.mt-portion span {
+  text-align: center;
+  font: var(--swift-headline2);
+}
+.mt-portion-hint {
+  text-align: center;
+}
+.mt-link {
+  height: 40px;
+  color: var(--swift-blue100);
+  font: var(--swift-assastiveTextL);
+}

@@ -2,12 +2,13 @@
  * ТЕСТ (не для прода): три варианта экрана добавления блюда.
  * Панель «Поведение → Экран добавления (тест)», state.controls.addTest:
  *   "ds"     — основной экран на компонентах DS (MealAddScreen);
- *   "quick"  — 1 «Быстрый список»: «+» у блюда = добавить в одно касание
- *              с прошлой порцией, плашка «Отменить»;
+ *   "quick"  — 1 «Быстрый список»: «+» у блюда = добавить это блюдо
+ *              с прошлой порцией и вернуться к приёму;
  *   "camera" — 2 «Камера первой»: экран открывается видоискателем,
  *              под затвором лента недавних в одно касание;
- *   "tray"   — 3 «Собрать приём»: отмечаешь несколько блюд, внизу
- *              копится итог, одна кнопка добавляет всё.
+ *   "tray"   — 3 «Выбрал → подтвердил»: касание блюда открывает короткую
+ *              шторку с порцией и одной кнопкой «Добавить в <приём>».
+ * Всегда добавляется ОДНО блюдо: выбрал → добавил → вернулся к приёму.
  * Во всех: тип приёма — четыре кнопки на экране (предвыбран со страницы
  * приёма или по времени суток), он же в тексте главной кнопки.
  * ===================================================================== */
@@ -58,6 +59,14 @@ function mtAddMany(products, when) {
   });
   N.log(`Добавлено блюд: ${es.length} → ${when.type}`);
   return es.map((e) => e.id);
+}
+function mtAddOne(p, when) {
+  mtAddMany([p], when);
+  mtFinish(when);
+  N.update((s) => {
+    s.toast = s.toastPill = `Добавлено в ${when.type.toLowerCase()}: ${p.name}`;
+    s.toastIcon = "toast.check-circle";
+  });
 }
 function mtUndo(ids) {
   N.update((s) => {
@@ -210,25 +219,14 @@ function MtQuick() {
     when = mtWhen(st),
     [q, setQ] = V.useState(""),
     [tab, setTab] = V.useState("recent"),
-    [snack, setSnack] = useMtSnack(),
-    [added, setAdded] = V.useState([]),
     list = mtPool(st, q.trim().toLowerCase(), tab),
     saved = (p) => p.own || st.favorites.includes(p.id),
     keyboard = st.controls.keyboard,
-    quickAdd = (p) => {
-      const ids = mtAddMany([p], when);
-      setAdded((a) => [...a, ...ids]);
-      setSnack({ text: `${p.name} → ${when.type.toLowerCase()}`, ids });
-    };
+    quickAdd = (p) => (mfHideKeyboard(), mtAddOne(p, when));
   return n.jsxs("div", {
     className: "mt-page",
     children: [
-      n.jsx(MtTop, {
-        title: "Что вы съели?",
-        right: added.length
-          ? n.jsx("button", { type: "button", className: "mt-done", onClick: () => mtFinish(when), children: "Готово" })
-          : null,
-      }),
+      n.jsx(MtTop, { title: "Добавить блюдо" }),
       n.jsx(MtTypeBar, { value: when.type }),
       n.jsx(MtSearch, { value: q, onChange: setQ }),
       !q && n.jsx(MtTabs, { tab, setTab, counts: { favorites: maFavorites(st).length } }),
@@ -274,12 +272,6 @@ function MtQuick() {
             })
           : n.jsx(MtEmpty, { q, tab }),
       }),
-      n.jsx(MtSnack, {
-        snack,
-        onUndo: () => {
-          mtUndo(snack.ids), setAdded((a) => a.filter((x) => !snack.ids.includes(x))), setSnack(null);
-        },
-      }),
       !keyboard &&
         n.jsxs("footer", {
           className: "mt-actions",
@@ -308,13 +300,9 @@ function MtCamera() {
     when = mtWhen(st),
     [mode, setMode] = V.useState("camera"),
     [q, setQ] = V.useState(""),
-    [snack, setSnack] = useMtSnack(),
     recent = maRecent(st),
     list = mtPool(st, q.trim().toLowerCase(), "recent"),
-    quickAdd = (p) => {
-      const ids = mtAddMany([p], when);
-      setSnack({ text: `${p.name} → ${when.type.toLowerCase()}`, ids });
-    };
+    quickAdd = (p) => (mfHideKeyboard(), mtAddOne(p, when));
   if (mode === "shot")
     return n.jsxs("div", {
       className: "mt-page mt-cam",
@@ -374,7 +362,6 @@ function MtCamera() {
               })
             : n.jsx(MtEmpty, { q, tab: "recent" }),
         }),
-        n.jsx(MtSnack, { snack, onUndo: () => (mtUndo(snack.ids), setSnack(null)) }),
       ],
     });
   return n.jsxs("div", {
@@ -446,117 +433,126 @@ function MtCamera() {
           }),
         ],
       }),
-      n.jsx(MtSnack, { snack, onUndo: () => (mtUndo(snack.ids), setSnack(null)) }),
     ],
   });
 }
 
-/* ---------- 3. Собрать приём ---------- */
+/* ---------- 3. Выбрал → подтвердил ---------- */
+function MtConfirm({ p, when, onClose }) {
+  const [grams, setGrams] = V.useState(p.portion || 100),
+    k = grams / 100,
+    item = { ...p, portion: grams },
+    step = (d) => setGrams((g) => Math.min(2e3, Math.max(10, Math.round((g + d) / 10) * 10)));
+  return n.jsx("div", {
+    className: "mt-confirm-backdrop",
+    onClick: onClose,
+    children: n.jsxs("section", {
+      className: "mt-confirm",
+      role: "dialog",
+      "aria-label": `Добавить «${p.name}»`,
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        n.jsx("i", { className: "mt-grab", "aria-hidden": "true" }),
+        n.jsx($, { as: "h2", token: "headline2", children: p.name }),
+        n.jsxs("div", {
+          className: "mt-confirm-kcal",
+          children: [
+            n.jsx($, { token: "widget1Headline", children: rt(Math.round(p.calories * k)) }),
+            n.jsx($, { token: "answer1M", className: "ms-muted", children: "ккал" }),
+            n.jsx(MsDots, { values: { proteins: (p.proteins || 0) * k, fats: (p.fats || 0) * k, carbs: (p.carbs || 0) * k }, token: "answer1M", className: "ms-dots mt-confirm-dots" }),
+          ],
+        }),
+        n.jsxs("div", {
+          className: "mt-portion",
+          children: [
+            n.jsx("button", { type: "button", "aria-label": "Меньше на 10 г", onClick: () => step(-10), children: "−" }),
+            n.jsxs("span", { "aria-live": "polite", children: [rt(grams), " г"] }),
+            n.jsx("button", { type: "button", "aria-label": "Больше на 10 г", onClick: () => step(10), children: "+" }),
+          ],
+        }),
+        p.portion && p.portion !== grams
+          ? n.jsx("button", { type: "button", className: "mt-link", onClick: () => setGrams(p.portion), children: `Как в прошлый раз — ${rt(p.portion)} г` })
+          : n.jsx($, { token: "assastiveTextM", className: "ms-muted mt-portion-hint", children: "Порция как в прошлый раз" }),
+        n.jsx("button", { type: "button", className: "mt-btn primary", onClick: () => mtAddOne(item, when), children: `Добавить в ${when.type.toLowerCase()}` }),
+        n.jsx("button", {
+          type: "button",
+          className: "mt-link",
+          onClick: () => (onClose(), N.sheet("product", { product: item, from: "search" })),
+          children: "Подробнее: БЖУ, название, порция",
+        }),
+      ],
+    }),
+  });
+}
 function MtTray() {
   const st = we(),
     when = mtWhen(st),
     [q, setQ] = V.useState(""),
     [tab, setTab] = V.useState("recent"),
-    [picked, setPicked] = V.useState([]),
-    pool = maUnique([...maFavorites(st), ...maRecent(st), ...st.products]),
+    [pick, setPick] = V.useState(null),
     list = mtPool(st, q.trim().toLowerCase(), tab),
-    key = (p) => p.name.toLowerCase(),
-    chosen = picked.map((k) => pool.find((p) => key(p) === k)).filter(Boolean),
-    kcal = chosen.reduce((a, p) => a + mtKcal(p), 0),
-    toggle = (p) => setPicked((s) => (s.includes(key(p)) ? s.filter((x) => x !== key(p)) : [...s, key(p)])),
-    keyboard = st.controls.keyboard,
-    submit = () => {
-      if (!chosen.length) return;
-      mtAddMany(chosen, when);
-      mtFinish(when);
-      N.update((s) => {
-        s.toast = s.toastPill = `${chosen.length === 1 ? chosen[0].name : `${chosen.length} блюда`} → ${when.type.toLowerCase()}`;
-        s.toastIcon = "toast.check-circle";
-      });
-    };
+    saved = (p) => p.own || st.favorites.includes(p.id),
+    keyboard = st.controls.keyboard;
   return n.jsxs("div", {
     className: "mt-page",
     children: [
-      n.jsx(MtTop, { title: "Что вы съели?" }),
+      n.jsx(MtTop, { title: "Добавить блюдо" }),
       n.jsx(MtTypeBar, { value: when.type }),
       n.jsx(MtSearch, { value: q, onChange: setQ }),
-      !q && n.jsx(MtTabs, { tab, setTab }),
+      !q && n.jsx(MtTabs, { tab, setTab, counts: { favorites: maFavorites(st).length } }),
       n.jsx("div", {
         className: "scroll mt-scroll",
         children: list.length
           ? n.jsx("ul", {
               className: "mt-list",
-              children: list.map((p) => {
-                const on = picked.includes(key(p));
-                return n.jsx(
+              children: list.map((p) =>
+                n.jsx(
                   "li",
                   {
                     children: n.jsxs("button", {
                       type: "button",
-                      className: `mt-item mt-pick ${on ? "on" : ""}`,
-                      "aria-pressed": on,
-                      onClick: () => toggle(p),
+                      className: "mt-item",
+                      onClick: () => (mfHideKeyboard(), setPick(p)),
                       children: [
                         n.jsxs("span", {
                           className: "mt-item-copy",
-                          children: [n.jsx($, { token: "answer1L", children: p.name }), n.jsx(MtMeta, { p })],
+                          children: [
+                            n.jsxs($, {
+                              token: "answer1L",
+                              children: [p.name, saved(p) && n.jsx("span", { className: "mt-heart", "aria-label": "в избранном", children: " ♥" })],
+                            }),
+                            n.jsx(MtMeta, { p }),
+                          ],
                         }),
-                        n.jsx("span", { className: "mt-tick", "aria-hidden": "true", children: on ? "✓" : "+" }),
+                        n.jsx("span", { className: "mt-chevron", "aria-hidden": "true", children: "›" }),
                       ],
                     }),
                   },
                   p.id + p.name,
-                );
-              }),
+                ),
+              ),
             })
           : n.jsx(MtEmpty, { q, tab }),
       }),
       !keyboard &&
-        n.jsx("footer", {
-          className: "mt-tray",
-          children: chosen.length
-            ? n.jsxs(n.Fragment, {
-                children: [
-                  n.jsxs("div", {
-                    className: "mt-tray-sum",
-                    children: [
-                      n.jsxs($, { token: "answer1L", children: [when.type, " · ", chosen.length, " ", chosen.length === 1 ? "блюдо" : chosen.length < 5 ? "блюда" : "блюд"] }),
-                      n.jsxs($, { token: "answer1L", children: [rt(kcal), " ккал"] }),
-                    ],
-                  }),
-                  n.jsx("div", {
-                    className: "mt-tray-names",
-                    children: chosen.map((p) =>
-                      n.jsxs("button", { type: "button", onClick: () => toggle(p), "aria-label": `Убрать «${p.name}»`, children: [p.name, " ×"] }, key(p)),
-                    ),
-                  }),
-                  n.jsx("button", { type: "button", className: "mt-btn primary", onClick: submit, children: `Добавить в ${when.type.toLowerCase()}` }),
-                ],
-              })
-            : n.jsxs("div", {
-                className: "mt-tray-empty",
-                children: [
-                  n.jsx($, { token: "assastiveTextM", className: "ms-muted", children: "Отметьте блюда — или:" }),
-                  n.jsxs("div", {
-                    className: "mt-tray-alt",
-                    children: [
-                      n.jsxs("button", {
-                        type: "button",
-                        className: "mt-btn",
-                        onClick: () => N.sheet("camera", { target: "meal" }),
-                        children: [n.jsx(Q, { name: "icon.food.camera", size: 20 }), "Фото"],
-                      }),
-                      n.jsxs("button", {
-                        type: "button",
-                        className: "mt-btn",
-                        onClick: () => N.sheet("entry", { kind: "meal" }),
-                        children: [n.jsx(Q, { name: "icon.food.add_manual", size: 20 }), "Вручную"],
-                      }),
-                    ],
-                  }),
-                ],
-              }),
+        n.jsxs("footer", {
+          className: "mt-actions",
+          children: [
+            n.jsxs("button", {
+              type: "button",
+              className: "mt-btn primary",
+              onClick: () => N.sheet("camera", { target: "meal" }),
+              children: [n.jsx(Q, { name: "icon.food.camera", size: 22 }), "Сфотографировать"],
+            }),
+            n.jsxs("button", {
+              type: "button",
+              className: "mt-btn",
+              onClick: () => N.sheet("entry", { kind: "meal" }),
+              children: [n.jsx(Q, { name: "icon.food.add_manual", size: 20 }), "Вручную"],
+            }),
+          ],
         }),
+      pick && n.jsx(MtConfirm, { p: pick, when, onClose: () => setPick(null) }),
     ],
   });
 }
