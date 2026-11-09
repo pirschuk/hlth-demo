@@ -790,7 +790,7 @@ var MF_RECOGNIZED = [
   { name: "Овощной салат с лососем", value: 318, grams: 240, proteins: 22.8, fats: 19.4, carbs: 11.6 },
 ];
 
-function mfStartRecognition() {
+function mfStartRecognition(description) {
   const id = N.id(),
     outcome = N.state.controls.next,
     epoch = N.epoch;
@@ -827,13 +827,14 @@ function mfStartRecognition() {
       } else {
         const r = MF_RECOGNIZED[s.entries.filter((x) => x.recognized).length % MF_RECOGNIZED.length];
         Object.assign(e, r, { recognizing: !1, recognized: !0 });
+        description && (e.name = description[0].toUpperCase() + description.slice(1));
       }
     });
     N.log(`recognition: ${outcome === "error" || outcome === "empty" ? "ошибка" : "готово"}`);
   }, Math.max(2500, N.state.controls.delay * 4));
   N.jobs.set(t, () => {});
 }
-function mfUsePhoto() {
+function mfUsePhoto(description) {
   N.update((s) => {
     (s.sheet = null),
       (s.flow = null),
@@ -841,7 +842,7 @@ function mfUsePhoto() {
       s.stacks.stats.at(-1) !== "detail-meal" && (s.stacks.stats = ["stats", "detail-meal"]),
       s.mealRecognitionHintHidden || (s.sheet = { kind: "meal-recognition-info", data: {} });
   });
-  mfStartRecognition();
+  mfStartRecognition(typeof description === "string" ? description.trim() : "");
 }
 
 function MealCamera({ gallery }) {

@@ -17265,6 +17265,27 @@ function gg() {
                   n.jsxs("label", {
                     className: "panel-label",
                     children: [
+                      "Экран добавления еды",
+                      n.jsx("select", {
+                        "aria-label": "Экран добавления еды",
+                        value: c.controls.addScreen ?? "hero",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.addScreen = h.target.value;
+                          }),
+                        children: [
+                          ["hero", "A · Поиск-герой"],
+                          ["chat", "B · Как в чате"],
+                          ["list", "Прежний (плитки и вкладки)"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
                       "Экран «Приёмы пищи»",
                       n.jsx("select", {
                         "aria-label": "Экран «Приёмы пищи»",
