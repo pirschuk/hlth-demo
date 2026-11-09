@@ -15346,7 +15346,8 @@ function rg({ screen: c }) {
     [f, d] = V.useState(""),
     v = c === "activity-search",
     x = c === "nutrition-own" || c === "nutrition-favorites";
-  if (c === "nutrition-add")
+  if (c === "nutrition-add") return n.jsx(MealAddScreen, {});
+  if (c === "nutrition-add-legacy")
     return n.jsxs(n.Fragment, {
       children: [
         n.jsx(fs, {
@@ -15638,7 +15639,7 @@ function rg({ screen: c }) {
 function nh(c) {
   c === "meal"
     ? (N.update((o) => {
-        o.mealDraftType = null;
+        o.mealDraftType = o.mealDraftDate = o.mealDraftTime = null;
       }),
       N.go("nutrition-add", "stats"))
     : c === "activity"
@@ -18970,7 +18971,7 @@ function xg({ kind: c, data: o }) {
     case "photos":
     case "camera":
       return o.target === "meal"
-        ? n.jsx(MealCamera, {})
+        ? n.jsx(MealCamera, { gallery: !!o.gallery })
         : n.jsx(Cg, { data: o, camera: c === "camera" });
     case "photo-preview":
       return n.jsxs(n.Fragment, {

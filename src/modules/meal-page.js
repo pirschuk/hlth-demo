@@ -28,7 +28,7 @@ function mpItems(s, meal) {
 }
 function mpAddTo(meal) {
   N.update((s) => {
-    s.mealDraftType = meal;
+    (s.mealDraftType = meal), (s.mealDraftDate = s.mealDraftTime = null);
   });
   N.go("nutrition-add", "stats");
 }

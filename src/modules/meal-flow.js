@@ -291,8 +291,8 @@ function MealCard({ data }) {
     [eaten, setEaten] = V.useState(String(entry?.grams || (mode === "manual" ? 100 : product?.portion || 100))),
     [when, setWhen] = V.useState(() => ({
       type: entry?.meal || data.meal || st.mealDraftType || mfGuessType(st.controls.clock),
-      date: entry?.date || today,
-      time: entry?.time || st.controls.clock,
+      date: entry?.date || data.date || st.mealDraftDate || today,
+      time: entry?.time || data.time || st.mealDraftTime || st.controls.clock,
     })),
     [open, setOpen] = V.useState(mode === "manual"),
     [touched, setTouched] = V.useState({}),
@@ -418,7 +418,7 @@ function MealCard({ data }) {
           (s.flow = null),
           (s.tab = "stats"),
           (s.date = e.date),
-          (s.mealDraftType = null),
+          (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null),
           (() => {
             const page = s.stacks.stats.indexOf(MP_PREFIX + e.meal);
             s.stacks.stats =
@@ -801,9 +801,9 @@ function mfStartRecognition() {
       kind: "meal",
       recognizing: !0,
       name: "Идёт распознавание",
-      date: s.date,
-      time: s.controls.clock,
-      meal: mfGuessType(s.controls.clock),
+      date: s.mealDraftDate || s.date,
+      time: s.mealDraftTime || s.controls.clock,
+      meal: s.mealDraftType || mfGuessType(s.controls.clock),
       value: 0,
       grams: 0,
       proteins: 0,
@@ -811,6 +811,9 @@ function mfStartRecognition() {
       carbs: 0,
       provider: "manual",
     });
+  });
+  N.update((s) => {
+    s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null;
   });
   N.log("recognition: начало");
   const t = setTimeout(() => {
@@ -841,8 +844,8 @@ function mfUsePhoto() {
   mfStartRecognition();
 }
 
-function MealCamera() {
-  const [shot, setShot] = V.useState(!1);
+function MealCamera({ gallery }) {
+  const [shot, setShot] = V.useState(!!gallery);
   return n.jsxs("div", {
     className: "mf-camera",
     role: "dialog",

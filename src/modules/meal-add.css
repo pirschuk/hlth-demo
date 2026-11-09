@@ -1,0 +1,137 @@
+/* Экран «Добавить приём пищи». Компоненты DS — см. meal-add.js. */
+
+.ma-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--swift-white);
+}
+.ma-header {
+  padding: 8px 16px 0;
+  margin-bottom: 8px;
+}
+
+/* Search (19318:278360): белое поле, обводка Blue/20, радиус 16, высота 56 */
+.ma-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  margin: 0 16px 16px;
+  padding: 0 12px 0 16px;
+  border-radius: 16px;
+  background: var(--swift-white);
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  color: var(--swift-greyText);
+}
+.ma-search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--swift-blue100);
+}
+.ma-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: var(--swift-answer1M);
+  color: var(--swift-mainText);
+  caret-color: var(--swift-blue100);
+}
+.ma-search input::placeholder {
+  color: var(--swift-greyText);
+}
+.ma-search > button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--swift-greyStroke);
+}
+
+/* [Food] Button_Add (23368:130470), вариант с тремя плитками */
+.ma-methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 16px;
+  padding: 12px;
+  border-radius: 24px;
+  background: var(--swift-blue20);
+}
+.ma-methods > button {
+  height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 6px;
+  border-radius: 20px;
+  background: var(--swift-white);
+  color: var(--swift-mainText);
+  font: var(--swift-number2L);
+  text-align: center;
+}
+.ma-methods > button:active {
+  background: var(--swift-blueSelectionBackground);
+}
+.ma-methods > button:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+  outline-offset: 2px;
+}
+
+.ma-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 16px 24px;
+}
+.ma-seg {
+  margin: 20px 0 12px;
+}
+.ma-empty {
+  padding: 24px 8px;
+}
+.ma-empty h3 {
+  margin: 12px 0 6px;
+}
+
+/* скелетон списка — [-My food] -list, состояние загрузки */
+.ma-skeleton > div {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  grid-template-rows: 14px 10px;
+  gap: 8px 12px;
+  padding: 14px 0;
+}
+.ma-skeleton > div + div {
+  box-shadow: inset 0 1px var(--swift-blue20);
+}
+.ma-skeleton i {
+  grid-row: span 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--swift-blue10);
+}
+.ma-skeleton b {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--swift-blue10), var(--swift-blue20), var(--swift-blue10));
+  background-size: 200% 100%;
+  animation: ma-shimmer 1.2s linear infinite;
+}
+.ma-skeleton b:last-child {
+  width: 40%;
+}
+@keyframes ma-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ma-skeleton b {
+    animation: none;
+  }
+}
