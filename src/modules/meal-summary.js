@@ -64,8 +64,10 @@ function MsMealRow({ entry: G }) {
 }
 
 function MealGroup({ name, items }) {
-  const t = msTotals(items),
-    show = t.count >= 2;
+  const st = we(),
+    t = msTotals(items),
+    show = t.count >= 2,
+    canRepeat = st.date < sl && t.count > 0;
   return n.jsxs("section", {
     className: "meal-history-group",
     children: [
@@ -84,6 +86,7 @@ function MealGroup({ name, items }) {
                 n.jsx(MsDots, { values: t, className: "ms-dots" }),
               ],
             }),
+          canRepeat && n.jsx(MealRepeatButton, { date: st.date, meal: name }),
         ],
       }),
       n.jsx("div", {

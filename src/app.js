@@ -12356,10 +12356,10 @@ function ds(c = "filled") {
           meal: "Завтрак",
           provider: "manual",
         },
-        ...(d === 0
+        ...(d <= 1
           ? [
               {
-                id: "meal-egg-0",
+                id: `meal-egg-${d}`,
                 kind: "meal",
                 date: v,
                 time: "09:30",
@@ -12373,7 +12373,7 @@ function ds(c = "filled") {
                 provider: "manual",
               },
               {
-                id: "meal-banana-0",
+                id: `meal-banana-${d}`,
                 kind: "meal",
                 date: v,
                 time: "09:35",
@@ -18812,6 +18812,8 @@ function xg({ kind: c, data: o }) {
           : n.jsx(ug, { data: o });
     case "product":
       return n.jsx(MealCard, { data: o });
+    case "meal-repeat":
+      return n.jsx(MealRepeatSheet, { data: o });
     case "meal-recognition-info":
       return n.jsx(MealRecognitionInfo, {});
     case "own-editor":

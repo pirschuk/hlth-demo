@@ -14,6 +14,7 @@
   color: var(--swift-blue100);
 }
 .ms-total {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 10px;

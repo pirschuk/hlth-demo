@@ -1,0 +1,83 @@
+/* Повтор приёма пищи. Токены — DESIGN_SYSTEM.md. */
+
+.mr-repeat-btn {
+  width: 32px;
+  height: 32px;
+  margin: -8px -8px -8px 0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--swift-blue100);
+  flex-shrink: 0;
+}
+.mr-repeat-btn:active {
+  background: var(--swift-blueSelectionBackground);
+}
+.mr-repeat-btn:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+  outline-offset: 1px;
+}
+
+.mr-sheet {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.phone-screen .mr-sheet h2 {
+  margin: 8px 40px 4px 0;
+}
+.mr-sub {
+  display: block;
+}
+.phone-screen .mr-sheet .mr-label {
+  margin: 20px 0 12px;
+}
+.mr-list {
+  background: var(--swift-white);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  overflow: hidden;
+}
+.mr-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.mr-item + .mr-item {
+  box-shadow: inset 0 1px var(--swift-blue20);
+}
+.mr-item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.mr-check {
+  appearance: none;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 2px var(--swift-greyStroke);
+  background: var(--swift-white) center / 14px auto no-repeat;
+  cursor: pointer;
+}
+.mr-check:checked {
+  box-shadow: none;
+  background-color: var(--swift-blue100);
+  background-image: url(../assets/ds.checkbox.mark2.png);
+}
+.mr-check:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+  outline-offset: 3px;
+}
+.mr-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
