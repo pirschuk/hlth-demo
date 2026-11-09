@@ -15637,7 +15637,10 @@ function rg({ screen: c }) {
 }
 function nh(c) {
   c === "meal"
-    ? N.go("nutrition-add", "stats")
+    ? (N.update((o) => {
+        o.mealDraftType = null;
+      }),
+      N.go("nutrition-add", "stats"))
     : c === "activity"
       ? N.go("activity-search", "stats")
       : N.sheet("entry", { kind: c });
@@ -16089,6 +16092,8 @@ function fg({ screen: c }) {
     v = V.useRef(null);
   if (c.startsWith("nutrition-") || c === "activity-search")
     return n.jsx(rg, { screen: c });
+  if (c.startsWith(MP_PREFIX))
+    return n.jsx(MealPage, { meal: c.slice(MP_PREFIX.length) });
   const x = c.startsWith("detail-"),
     j = x ? c.replace("detail-", "") : "meal",
     k = o.controls.view === "empty" ? [] : $f(o, j),
@@ -16167,7 +16172,9 @@ function fg({ screen: c }) {
             (k.length > 0 || o.goals[j] > 0) &&
               o.controls.view !== "empty" &&
               n.jsx(_u, { kind: j, compact: !0 }),
-            k.length
+            j === "meal" && mpVariant(o) === "blocks" && o.controls.view !== "empty"
+              ? n.jsx(MealBlocks, {})
+              : k.length
               ? g.map((w) =>
                   j === "meal"
                     ? n.jsx(MealGroup, { name: w.name, items: w.items }, w.name)
@@ -17251,6 +17258,26 @@ function gg() {
                             children: "Нет данных",
                           }),
                         ],
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
+                      "Экран «Приёмы пищи»",
+                      n.jsx("select", {
+                        "aria-label": "Экран «Приёмы пищи»",
+                        value: c.controls.mealList ?? "groups",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.mealList = h.target.value;
+                          }),
+                        children: [
+                          ["groups", "Группы с блюдами"],
+                          ["blocks", "Блоки → страница приёма"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
                       }),
                     ],
                   }),

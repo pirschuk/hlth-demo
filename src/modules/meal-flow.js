@@ -290,7 +290,7 @@ function MealCard({ data }) {
     [pw, setPw] = V.useState(String(initial.portion)),
     [eaten, setEaten] = V.useState(String(entry?.grams || (mode === "manual" ? 100 : product?.portion || 100))),
     [when, setWhen] = V.useState(() => ({
-      type: entry?.meal || data.meal || mfGuessType(st.controls.clock),
+      type: entry?.meal || data.meal || st.mealDraftType || mfGuessType(st.controls.clock),
       date: entry?.date || today,
       time: entry?.time || st.controls.clock,
     })),
@@ -418,7 +418,16 @@ function MealCard({ data }) {
           (s.flow = null),
           (s.tab = "stats"),
           (s.date = e.date),
-          s.stacks.stats.at(-1) !== "detail-meal" && (s.stacks.stats = ["stats", "detail-meal"]),
+          (s.mealDraftType = null),
+          (() => {
+            const page = s.stacks.stats.indexOf(MP_PREFIX + e.meal);
+            s.stacks.stats =
+              page >= 0
+                ? s.stacks.stats.slice(0, page + 1)
+                : s.stacks.stats.at(-1) === "detail-meal"
+                  ? s.stacks.stats
+                  : ["stats", "detail-meal"];
+          })(),
           (s.toast = s.toastPill = "Приём пищи успешно добавлен"),
           (s.toastIcon = "toast.check-circle");
       })) || 0;
