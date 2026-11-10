@@ -1,0 +1,261 @@
+/* Добавление блюда — альтернативные компоновки (см. meal-alt.js). */
+
+.mv-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #ffffffcc;
+  color: var(--swift-blue100);
+}
+.mv-close.light {
+  background: #ffffff33;
+  color: var(--swift-white);
+}
+.mv-cam {
+  flex: 0 0 56px;
+  height: 56px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--swift-blue100);
+  box-shadow: 0 8px 20px #2b6cfc40;
+}
+.mv-cam .icon {
+  filter: brightness(0) invert(1);
+}
+.mv-cam.light {
+  background: #ffffff33;
+  box-shadow: none;
+}
+.mv-cam:active,
+.mv-round:active {
+  transform: scale(0.96);
+}
+.ma-soft .ma-list > .mv-row-head .ma-caption {
+  margin: 0;
+}
+
+/* ---------- «Сцена» ---------- */
+.mv-hero {
+  padding: 8px 16px 20px;
+  border-radius: 0 0 32px 32px;
+  background: linear-gradient(160deg, #2b6cfc 0%, #5a8bff 60%, #7aa3ff 100%);
+  color: var(--swift-white);
+  box-shadow: 0 12px 32px #2b6cfc33;
+}
+.mv-hero-top {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  text-align: center;
+}
+.mv-hero-sub {
+  color: #ffffffcc;
+}
+.mv-hero-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 12px 0 16px;
+  color: var(--swift-white);
+  font: 600 40px/44px SB, sans-serif;
+  letter-spacing: -0.5px;
+}
+.mv-hero-title i {
+  font-style: normal;
+  font-size: 20px;
+  opacity: 0.8;
+}
+.mv-hero-search {
+  margin: 0;
+}
+.mv-hero-search .ma-search {
+  box-shadow: 0 8px 24px #0029841f;
+}
+.mv-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 24px 4px 8px;
+}
+.mv-row-head button {
+  color: var(--swift-blue100);
+  font: var(--swift-assastiveTextL);
+}
+.mv-carousel {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 -16px;
+  padding: 2px 16px 8px;
+  scrollbar-width: none;
+}
+.mv-carousel::-webkit-scrollbar {
+  display: none;
+}
+.mv-fav-card {
+  flex: 0 0 148px;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--swift-white);
+  box-shadow: 0 6px 20px #0029840d;
+  text-align: left;
+  color: var(--swift-mainText);
+}
+.mv-fav-card .ma-link-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: auto;
+}
+.mv-fav-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mv-note {
+  margin: 0 4px;
+}
+.mv-manual {
+  width: 100%;
+  height: 52px;
+  margin-top: 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffffb3;
+  color: var(--swift-blue100);
+  font: var(--swift-button);
+}
+
+/* ---------- «Нижняя строка» ---------- */
+.mv-dock-head {
+  padding: 8px 16px 4px;
+}
+.phone-screen .mv-question {
+  margin: 20px 0 4px;
+  font: 600 34px/40px SB, sans-serif;
+  letter-spacing: -0.4px;
+  color: var(--swift-mainText);
+}
+.mv-question button {
+  font: inherit;
+  color: var(--swift-blue100);
+  border-bottom: 3px solid var(--swift-blue30);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.mv-question button i {
+  font-style: normal;
+  font-size: 16px;
+}
+.mv-dock {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 28px;
+  background: #ffffffe6;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -8px 28px #0029841a;
+}
+.mv-dock .ma-search {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  border-radius: 20px;
+  background: var(--swift-blue10);
+  box-shadow: none;
+}
+.mv-round {
+  flex: 0 0 56px;
+  height: 56px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--swift-blue20);
+  color: var(--swift-blue100);
+}
+
+/* ---------- «Бенто» ---------- */
+.mv-bento-list {
+  padding-top: 8px;
+}
+.mv-bento {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  height: 232px;
+  margin-top: 4px;
+}
+.mv-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 2px;
+  text-align: left;
+  background: var(--swift-white);
+  box-shadow: 0 6px 20px #0029840d;
+  color: var(--swift-mainText);
+}
+.mv-tile:active {
+  transform: scale(0.98);
+}
+.mv-tile.photo {
+  grid-row: span 2;
+  color: var(--swift-white);
+  background: #1c1c1e;
+}
+.mv-tile.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.75;
+}
+.mv-tile.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 35%, #000000b3);
+}
+.mv-tile.photo > :not(img) {
+  position: relative;
+  z-index: 1;
+}
+.mv-tile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: auto;
+  background: #ffffff33;
+}
+.mv-tile-icon .icon {
+  filter: brightness(0) invert(1);
+}
+.mv-tile .ma-link-icon {
+  margin-bottom: auto;
+}
+.mv-bento-search {
+  margin-top: 16px;
+}
+.mv-bento-search .ma-search {
+  margin: 0;
+}

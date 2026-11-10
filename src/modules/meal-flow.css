@@ -655,3 +655,9 @@
 .overlay-backdrop.native-flow-overlay.with-keyboard .native-flow-sheet {
   max-height: 100%;
 }
+
+/* тост-плашка внизу, над таб-баром: не перекрывает шапку экрана */
+.toast.toast-pill {
+  top: auto;
+  bottom: 180px;
+}

@@ -234,7 +234,27 @@ function MealAddScreen() {
     [q, setQ] = V.useState(""),
     qq = q.trim().toLowerCase(),
     results = qq ? maSearchAll(st, qq) : null,
-    view = st.controls.view;
+    view = st.controls.view,
+    variant = st.controls.addVariant ?? "main";
+  /* скрыть рамку фокуса, когда клавиатуру закрыли кнопкой «Готово» */
+  V.useEffect(() => {
+    !st.controls.keyboard && document.activeElement?.closest?.(".ma-page") && document.activeElement.blur();
+  }, [st.controls.keyboard]);
+  if (variant !== "main")
+    return n.jsx(MaVariant, {
+      variant,
+      ctx: {
+        st, type, saved, favs, recent, q, setQ, results, view,
+        openChooser: () => (mfHideKeyboard(), setChoose(!0)),
+        chooser:
+          choose &&
+          n.jsx(MaChooser, {
+            current: chosen || st.lastMealType,
+            onPick: (t) => (maSetType(t), setChoose(!1)),
+            onClose: () => (chosen ? setChoose(!1) : N.back()),
+          }),
+      },
+    });
   return n.jsxs("div", {
     className: "ma-page ma-soft",
     children: [

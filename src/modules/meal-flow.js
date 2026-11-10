@@ -748,7 +748,7 @@ function MealCard({ data }) {
             className: "mf-primary",
             disabled: !canAdd,
             onClick: () => void (mode === "entry" ? saveEntry() : add()),
-            children: mode === "entry" ? "Сохранить изменения" : "Добавить приём пищи",
+            children: mode === "entry" ? "Сохранить изменения" : `Добавить в ${when.type.toLowerCase()}`,
           }),
         ],
       });

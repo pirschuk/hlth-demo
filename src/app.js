@@ -17281,6 +17281,28 @@ function gg() {
                   n.jsxs("label", {
                     className: "panel-label",
                     children: [
+                      "Экран добавления",
+                      n.jsx("select", {
+                        "aria-label": "Экран добавления",
+                        value: c.controls.addVariant ?? "main",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.addVariant = h.target.value;
+                          }),
+                        children: [
+                          ["main", "Основной"],
+                          ["hero", "Вариант · Сцена"],
+                          ["dock", "Вариант · Нижняя строка"],
+                          ["bento", "Вариант · Бенто"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
                       "Экран «Приёмы пищи»",
                       n.jsx("select", {
                         "aria-label": "Экран «Приёмы пищи»",
