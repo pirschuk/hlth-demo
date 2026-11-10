@@ -12243,6 +12243,18 @@ const sl = "2026-09-11",
       carbs: 0,
     },
   ],
+  MF_DEMO_FAVORITES = [
+    ["Авокадо", 160, 2, 14.7, 8.5], ["Банановый смузи", 89, 2.5, 1.2, 18], ["Борщ", 49, 2.4, 2.1, 5.2],
+    ["Брокколи на пару", 35, 2.4, 0.4, 7], ["Буррито с курицей", 210, 12, 7, 24], ["Гречка отварная", 110, 4.2, 1.1, 21],
+    ["Греческий салат", 104, 3.4, 8.6, 4.1], ["Запеканка творожная", 168, 13, 6, 15], ["Индейка тушёная", 136, 23, 4.5, 0],
+    ["Капучино", 42, 2.2, 2.1, 3.6], ["Кесадилья", 255, 11, 12, 26], ["Киноа с овощами", 120, 4.4, 2.3, 21],
+    ["Котлета куриная", 190, 17, 11, 6], ["Макароны отварные", 140, 4.8, 0.9, 28], ["Мюсли с йогуртом", 180, 6, 5, 27],
+    ["Омлет", 154, 10, 12, 1.2], ["Паста карбонара", 220, 9, 11, 22], ["Плов с курицей", 165, 8, 6, 20],
+    ["Протеиновый батончик", 360, 30, 9, 38], ["Рис с овощами", 115, 2.6, 2, 22], ["Сырники", 220, 15, 10, 18],
+    ["Творог 5%", 121, 17, 5, 1.8], ["Тост с авокадо", 190, 5, 10, 20], ["Тыквенный суп", 55, 1.3, 2.6, 7],
+    ["Фалафель", 333, 13, 18, 32], ["Хумус", 166, 8, 9.6, 14], ["Цезарь с курицей", 150, 10, 9, 7],
+    ["Чечевичный суп", 70, 4.5, 1.5, 10], ["Шакшука", 105, 6.5, 7, 4], ["Яблочный пирог", 237, 2.4, 11, 34],
+  ].map(([name, calories, proteins, fats, carbs], i) => ({ id: `fav-${i}`, name, calories, proteins, fats, carbs, own: !0 })),
   rs = [
     { name: "Ходьба", rate: 3.5 },
     { name: "Бег", rate: 8 },
@@ -12453,8 +12465,8 @@ function ds(c = "filled") {
       strategy: "Снизить вес",
     },
     entries: f,
-    products: [...zp],
-    favorites: ["oats"],
+    products: c === "favorites" ? [...zp, ...MF_DEMO_FAVORITES] : [...zp],
+    favorites: c === "favorites" ? ["oats", "egg", "apple", "salmon", "yogurt", ...MF_DEMO_FAVORITES.map((p) => p.id)] : ["oats"],
     messages: o
       ? []
       : [
@@ -13218,7 +13230,7 @@ function ha({ title: c, back: o = !1, right: f }) {
 function La({ children: c }) {
   const o = we();
   /* экран «Добавить блюдо» рисует свои состояния загрузки и ошибки (meal-add.js) */
-  if (N.screen() === "nutrition-add") return c;
+  if (["nutrition-add", "nutrition-favorites"].includes(N.screen())) return c;
   return o.controls.view === "loading"
     ? n.jsx("div", {
         className: "skeletons",
@@ -15349,6 +15361,7 @@ function rg({ screen: c }) {
     v = c === "activity-search",
     x = c === "nutrition-own" || c === "nutrition-favorites";
   if (c === "nutrition-add") return n.jsx(MealAddScreen, {});
+  if (c === "nutrition-favorites") return n.jsx(MealFavoritesScreen, {});
   if (c === "nutrition-add-legacy")
     return n.jsxs(n.Fragment, {
       children: [
@@ -17057,6 +17070,7 @@ const pg = [
   ["new", "Новый пользователь"],
   ["empty", "Пустой дневник"],
   ["rich", "Насыщенный дневник"],
+  ["favorites", "Много избранного"],
   ["health", "Подключённый Health"],
   ["error", "Ошибка загрузки"],
 ];
