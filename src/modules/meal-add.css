@@ -60,7 +60,7 @@
   color: var(--swift-greyStroke);
 }
 
-.ma-seg {
+.mf-seg.ma-seg {
   margin: 16px 16px 12px;
 }
 .ma-list {
@@ -159,21 +159,14 @@
   background: var(--swift-blueSelectionBackground);
 }
 
-/* Search как кнопка, открывает экран поиска */
-.ma-search-btn {
-  width: calc(100% - 32px);
+.ma-search {
   margin-top: 8px;
-  font: var(--swift-answer1M);
-  color: var(--swift-greyText);
-  text-align: left;
 }
-.ma-search-btn:active {
-  box-shadow: inset 0 0 0 1px var(--swift-blue100);
+.phone-screen .ma-caption {
+  margin: 20px 16px 8px;
+  padding: 0;
+  color: var(--swift-blue100);
 }
-.ma-search-results .ma-empty {
-  padding-top: 48px;
-}
-
 /* «Что добавляем?» — Drawer modal + SelectionCard (31967:295707) */
 .ma-chooser h2 {
   margin: 0 0 8px;

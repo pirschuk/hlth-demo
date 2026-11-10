@@ -1,16 +1,14 @@
 /* =====================================================================
- * Добавление блюда, итерация 2 (plan.md, 2026-11-10).
+ * Добавление блюда, итерация 3 (plan.md, 2026-11-10).
  * 1) «Что добавляем?» — шторка выбора приёма: Drawer modal (16982:333490)
  *    + строки SelectionCard (31967:295707). Не показывается, если приём уже
  *    задан (со страницы приёма).
  * 2) Экран приёма «Обед ▾»: [Food] Header (22926:116978) с названием приёма
- *    (касание — сменить), кнопка-поле Search (19318:278360) «Найти в каталоге»,
+ *    (касание — сменить), поле Search (19318:278360): пусто — свои блюда,
+ *    ввод — результаты каталога с подписью «КАТАЛОГ» (реф. BitePal),
  *    SegmentedControl (23461:360783) «Избранное · N / Недавние»,
  *    [-My food] -list (21433:257994) со скелетоном, [-Статистика] Error page
  *    (7344:83983), [Food] Button_Add (23368:130470) ×2.
- * 3) Поиск — отдельный экран по [add_food] Main (21687:161740): «‹», заголовок
- *    «Искать продукт», Search в фокусе, иллюстрация в пустом состоянии,
- *    результаты каталога [-My food] -list (избранные первыми, ♥).
  * Касание блюда → карточка блюда (порция) → добавление в выбранный приём.
  * Тип приёма от времени не зависит. Не из DS: — (иконок приёмов в DS нет,
  * в шторке только названия).
@@ -178,7 +176,7 @@ function MaChooser({ current, onPick, onClose }) {
   });
 }
 
-/* 2. экран приёма */
+/* 2. экран приёма: одно поле — пусто: свои блюда, ввод: каталог (реф. BitePal) */
 function MealAddScreen() {
   const st = we(),
     chosen = st.mealDraftType,
@@ -187,97 +185,30 @@ function MealAddScreen() {
     favs = maFavorites(st),
     [tab, setTab] = V.useState(() => (favs.length ? "favorites" : "recent")),
     [choose, setChoose] = V.useState(!chosen),
+    [q, setQ] = V.useState(""),
+    qq = q.trim().toLowerCase(),
+    results = qq
+      ? maUnique([...st.products, ...favs, ...maRecent(st)])
+          .filter((p) => p.name.toLowerCase().includes(qq))
+          .sort((a, b) => (saved(a) ? 0 : 1) - (saved(b) ? 0 : 1))
+      : null,
     list = tab === "favorites" ? favs : maRecent(st),
-    view = st.controls.view;
+    view = st.controls.view,
+    keyboard = st.controls.keyboard;
   return n.jsxs("div", {
     className: "ma-page",
     children: [
       n.jsxs("header", {
         className: "ma-header",
         children: [
-          n.jsx(MfIconButton, { label: "Закрыть", icon: "close", size: 16, onClick: () => N.back() }),
+          n.jsx(MfIconButton, { label: "Закрыть", icon: "close", size: 16, onClick: () => (mfHideKeyboard(), N.back()) }),
           n.jsxs("button", {
             type: "button",
             className: "ma-title",
             "aria-label": `Приём пищи: ${type}. Сменить`,
-            onClick: () => setChoose(!0),
+            onClick: () => (mfHideKeyboard(), setChoose(!0)),
             children: [n.jsx($, { as: "h1", token: "headline2", children: type }), n.jsx(Q, { name: "icon.chevron.down", size: 14 })],
           }),
-          n.jsx("span", {}),
-        ],
-      }),
-      n.jsxs("button", {
-        type: "button",
-        className: "ma-search ma-search-btn",
-        onClick: () => N.go("nutrition-search"),
-        children: [n.jsx(Q, { name: "search", size: 24 }), n.jsx("span", { children: "Найти в каталоге" })],
-      }),
-      n.jsx("div", {
-        className: "mf-seg ma-seg",
-        role: "radiogroup",
-        "aria-label": "Мои блюда",
-        children: [
-          ["favorites", `Избранное${favs.length ? " · " + favs.length : ""}`],
-          ["recent", "Недавние"],
-        ].map(([v, l]) => n.jsx("button", { type: "button", role: "radio", "aria-checked": tab === v, onClick: () => setTab(v), children: l }, v)),
-      }),
-      n.jsx("div", {
-        className: "scroll ma-list",
-        children:
-          view === "loading"
-            ? n.jsx(MaSkeleton, {})
-            : view === "error"
-              ? n.jsx(MaError, {})
-              : list.length
-                ? n.jsx(MaList, { items: list, saved })
-                : n.jsx(MaEmpty, MA_EMPTY[tab]),
-      }),
-      n.jsx("div", {
-        className: "ma-methods",
-        children: [
-          ["icon.food.add_manual", "Добавить вручную", () => N.sheet("entry", { kind: "meal" })],
-          ["icon.food.camera", "Распознать по фото", () => N.sheet("camera", { target: "meal" })],
-        ].map(([icon, label, f]) => n.jsxs("button", { type: "button", onClick: f, children: [n.jsx(Q, { name: icon, size: 20 }), n.jsx("span", { children: label })] }, label)),
-      }),
-      choose &&
-        n.jsx(MaChooser, {
-          current: chosen || st.lastMealType,
-          onPick: (t) => (maSetType(t), setChoose(!1)),
-          onClose: () => (chosen ? setChoose(!1) : N.back()),
-        }),
-    ],
-  });
-}
-
-/* 3. экран поиска по каталогу — [add_food] Main */
-function MealSearchScreen() {
-  const st = we(),
-    saved = (p) => p.own || st.favorites.includes(p.id),
-    [q, setQ] = V.useState(""),
-    ref = V.useRef(null),
-    qq = q.trim().toLowerCase(),
-    results = qq
-      ? maUnique([...st.products, ...maFavorites(st), ...maRecent(st)])
-          .filter((p) => p.name.toLowerCase().includes(qq))
-          .sort((a, b) => (saved(a) ? 0 : 1) - (saved(b) ? 0 : 1))
-      : [];
-  V.useEffect(() => {
-    const t = setTimeout(() => ref.current?.focus(), 50);
-    return () => clearTimeout(t);
-  }, []);
-  return n.jsxs("div", {
-    className: "ma-page",
-    children: [
-      n.jsxs("header", {
-        className: "ma-header",
-        children: [
-          n.jsx("button", {
-            className: "icon-button",
-            "aria-label": "Назад",
-            onClick: () => (mfHideKeyboard(), N.back()),
-            children: n.jsx(Q, { name: "main.icons.chevron_left", size: 24 }),
-          }),
-          n.jsx($, { as: "h1", token: "answer0L", children: "Искать продукт" }),
           n.jsx("span", {}),
         ],
       }),
@@ -286,9 +217,8 @@ function MealSearchScreen() {
         children: [
           n.jsx(Q, { name: "search", size: 24 }),
           n.jsx("input", {
-            ref,
-            "aria-label": "Найти блюдо",
-            placeholder: "Найти блюдо",
+            "aria-label": "Найти блюдо или продукт",
+            placeholder: "Найти блюдо или продукт",
             value: q,
             onChange: (e) => setQ(e.target.value),
           }),
@@ -302,27 +232,56 @@ function MealSearchScreen() {
             }),
         ],
       }),
+      results
+        ? n.jsx($, { as: "h3", token: "capsSign", className: "ma-caption", children: "КАТАЛОГ" })
+        : n.jsx("div", {
+            className: "mf-seg ma-seg",
+            role: "radiogroup",
+            "aria-label": "Мои блюда",
+            children: [
+              ["favorites", `Избранное${favs.length ? " · " + favs.length : ""}`],
+              ["recent", "Недавние"],
+            ].map(([v, l]) => n.jsx("button", { type: "button", role: "radio", "aria-checked": tab === v, onClick: () => setTab(v), children: l }, v)),
+          }),
       n.jsx("div", {
-        className: "scroll ma-list ma-search-results",
+        className: "scroll ma-list",
         children:
-          st.controls.view === "loading"
+          view === "loading"
             ? n.jsx(MaSkeleton, {})
-            : !qq
-              ? n.jsx(MaEmpty, { image: "image.useccsessful.search", title: "Найдите блюдо или продукт", text: "Введите название блюда, продукта или ингредиента." })
-              : results.length
-                ? n.jsx(MaList, { items: results, saved })
-                : n.jsx(MaEmpty, {
-                    image: "image.food.not_found",
-                    title: "Ничего не найдено",
-                    text: "Среди блюд нет подходящих результатов.",
-                    action: n.jsx(re, {
-                      secondary: !0,
-                      className: "ma-empty-btn",
-                      onClick: () => (mfHideKeyboard(), N.sheet("entry", { kind: "meal", name: q.trim() })),
-                      children: "Добавить вручную",
-                    }),
-                  }),
+            : view === "error"
+              ? n.jsx(MaError, {})
+              : results
+                ? results.length
+                  ? n.jsx(MaList, { items: results, saved })
+                  : n.jsx(MaEmpty, {
+                      image: "image.food.not_found",
+                      title: "Ничего не найдено",
+                      text: "В каталоге нет подходящих блюд.",
+                      action: n.jsx(re, {
+                        secondary: !0,
+                        className: "ma-empty-btn",
+                        onClick: () => (mfHideKeyboard(), N.sheet("entry", { kind: "meal", name: q.trim() })),
+                        children: "Добавить вручную",
+                      }),
+                    })
+                : list.length
+                  ? n.jsx(MaList, { items: list, saved })
+                  : n.jsx(MaEmpty, MA_EMPTY[tab]),
       }),
+      !keyboard &&
+        n.jsx("div", {
+          className: "ma-methods",
+          children: [
+            ["icon.food.add_manual", "Добавить вручную", () => N.sheet("entry", { kind: "meal" })],
+            ["icon.food.camera", "Распознать по фото", () => N.sheet("camera", { target: "meal" })],
+          ].map(([icon, label, f]) => n.jsxs("button", { type: "button", onClick: f, children: [n.jsx(Q, { name: icon, size: 20 }), n.jsx("span", { children: label })] }, label)),
+        }),
+      choose &&
+        n.jsx(MaChooser, {
+          current: chosen || st.lastMealType,
+          onPick: (t) => (maSetType(t), setChoose(!1)),
+          onClose: () => (chosen ? setChoose(!1) : N.back()),
+        }),
     ],
   });
 }
