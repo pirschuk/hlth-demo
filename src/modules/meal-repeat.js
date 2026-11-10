@@ -75,7 +75,7 @@ function MealRepeatSheet({ data }) {
             top.startsWith("nutrition-") &&
             ((s.tab = "stats"),
             (s.stacks.stats =
-              mpVariant(s) === "blocks" ? ["stats", "detail-meal", MP_PREFIX + type] : ["stats", "detail-meal"]),
+              mpPaged(s) ? ["stats", "detail-meal", MP_PREFIX + type] : ["stats", "detail-meal"]),
             (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null));
         s.toast = s.toastPill = date === sl ? `${type} добавлен на сегодня` : `${type} добавлен на ${_p(date)}`;
         s.toastIcon = "toast.check-circle";

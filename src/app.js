@@ -16188,8 +16188,8 @@ function fg({ screen: c }) {
             (k.length > 0 || o.goals[j] > 0) &&
               o.controls.view !== "empty" &&
               n.jsx(_u, { kind: j, compact: !0 }),
-            j === "meal" && mpVariant(o) === "blocks" && o.controls.view !== "empty"
-              ? n.jsx(MealBlocks, {})
+            j === "meal" && mpPaged(o) && o.controls.view !== "empty"
+              ? n.jsx(mpVariant(o) === "hybrid" ? MealHybrid : MealBlocks, {})
               : k.length
               ? g.map((w) =>
                   j === "meal"
@@ -17336,6 +17336,7 @@ function gg() {
                         children: [
                           ["groups", "Группы с блюдами"],
                           ["blocks", "Блоки → страница приёма"],
+                          ["hybrid", "Гибрид: блоки с блюдами"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
                         ),

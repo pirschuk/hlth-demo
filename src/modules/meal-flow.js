@@ -421,7 +421,7 @@ function MealCard({ data }) {
             s.stacks.stats =
               page >= 0
                 ? s.stacks.stats.slice(0, page + 1)
-                : mpVariant(s) === "blocks"
+                : mpPaged(s)
                   ? ["stats", "detail-meal", MP_PREFIX + e.meal]
                   : ["stats", "detail-meal"];
           })(),

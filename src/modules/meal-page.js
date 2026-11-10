@@ -2,7 +2,7 @@
  * Вариант экрана «Приёмы пищи»: карточки приёмов → страница приёма.
  * По макету 2026-11-09 (главная + «Завтрак»). Переключается в панели
  * «Поведение → Экран «Приёмы пищи»» (state.controls.mealList:
- * "groups" — группы с блюдами; "blocks" — этот вариант).
+ * "groups" — группы с блюдами; "blocks" — этот вариант; "hybrid" — блоки с блюдами, см. внизу).
  *
  *  - Главная: календарь, общий виджет «Питание», карточка на каждый приём:
  *    название + бейдж с количеством блюд, БЖУ слева, ккал справа.
@@ -22,6 +22,10 @@ var MP_MACROS = [
 
 function mpVariant(s) {
   return s.controls.mealList ?? "groups";
+}
+/* режимы, где у приёма есть своя страница (после добавления возвращаемся на неё) */
+function mpPaged(s) {
+  return ["blocks", "hybrid"].includes(mpVariant(s));
 }
 function mpItems(s, meal) {
   return $f(s, "meal").filter((e) => (e.meal || "Перекус") === meal);
@@ -162,5 +166,82 @@ function MealPage({ meal }) {
         children: "+",
       }),
     ],
+  });
+}
+
+/* =====================================================================
+ * Гибрид (state.controls.mealList = "hybrid"): всё на одном экране.
+ * Блок приёма всегда раскрыт: шапка «Завтрак · N  ккал ›» → страница приёма
+ * (повтор, итоги, «+»), под ней блюда компактными строками → карточка блюда.
+ * Больше MH_LIMIT блюд — первые MH_LIMIT и «Ещё N ›» → страница приёма.
+ * Пустой приём — строка «Добавить» с выбранным типом.
+ * MH_LIMIT = 3 — допущение (не из ТЗ). Компактная строка — не из DS
+ * (основа — [-My food] -list: название, ккал справа, вторая строка серым).
+ * ===================================================================== */
+var MH_LIMIT = 3;
+function MhRow({ entry: e }) {
+  if (e.recognizing || e.recognizeError) return n.jsx(MealRecognitionRow, { entry: e });
+  return n.jsxs("button", {
+    type: "button",
+    className: "mh-row",
+    onClick: () => N.sheet("entry", { kind: "meal", entryId: e.id }),
+    children: [
+      n.jsxs("span", {
+        className: "mh-row-copy",
+        children: [
+          n.jsx($, { token: "assastiveTextL", className: "mh-row-name", children: e.name }),
+          n.jsxs($, { token: "number3M", className: "ms-muted", children: [e.time, " · ", rt(Math.round(e.grams || 100)), " ", e.unit || "г"] }),
+        ],
+      }),
+      n.jsxs($, { token: "number2L", className: "mh-row-kcal", children: [rt(Math.round(e.value)), " ккал"] }),
+    ],
+  });
+}
+function MealHybrid() {
+  const st = we();
+  return n.jsx("div", {
+    className: "mp-blocks mh-blocks",
+    children: MF_TYPES.map((meal) => {
+      const items = mpItems(st, meal),
+        t = msTotals(items),
+        count = items.filter((e) => !e.recognizeError).length,
+        more = items.length - MH_LIMIT;
+      return n.jsxs(
+        "section",
+        {
+          className: "mh-card",
+          "aria-label": meal,
+          children: [
+            n.jsxs("button", {
+              type: "button",
+              className: "mh-head",
+              onClick: () => (items.length ? mpOpen(meal) : mpAddTo(meal)),
+              "aria-label": items.length ? `${meal}: ${Math.round(t.calories)} ккал. Открыть приём` : `${meal}: нет записей. Добавить`,
+              children: [
+                n.jsx($, { token: "answer0L", children: meal }),
+                count > 0 && n.jsxs($, { token: "number2L", className: "mh-head-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
+                n.jsx(Q, { name: items.length ? "chevron" : "entry-plus", size: items.length ? 16 : 20 }),
+              ],
+            }),
+            count > 1 && n.jsx(MsDots, { values: t, className: "ms-dots mh-dots" }),
+            items.length > 0 &&
+              n.jsxs("div", {
+                className: "mh-list",
+                children: [
+                  items.slice(0, MH_LIMIT).map((e) => n.jsx(MhRow, { entry: e }, e.id)),
+                  more > 0 &&
+                    n.jsxs("button", {
+                      type: "button",
+                      className: "mh-more",
+                      onClick: () => mpOpen(meal),
+                      children: [n.jsx($, { token: "assastiveTextL", children: `Ещё ${more}` }), n.jsx(Q, { name: "chevron", size: 14 })],
+                    }),
+                ],
+              }),
+          ],
+        },
+        meal,
+      );
+    }),
   });
 }
