@@ -24,3 +24,9 @@
 - ★ Airbnb — карточка в фокусе «2 of 4» · `4-pattern-airbnb-card-deck.jpg` · [mobbin](https://mobbin.com/screens/3d8bded6-a807-4e34-8eda-40890d5890ea) → тест «Карточки».
 - ★ How We Feel — крупные плитки инструментов · `4-pattern-howwefeel-tiles.jpg` · [mobbin](https://mobbin.com/screens/679c1701-7253-44e6-b104-82b60647c6df) → тест «Плитки».
 - ChatGPT — виджет «Ask» + круглые кнопки камера/фото · `4-pattern-chatgpt-widget.jpg` · [mobbin](https://mobbin.com/screens/7f7bea6f-be53-461f-8119-395070d82df3)
+
+## Зона 3, дополнение (2026-11-10, /idea «добавление блюда»)
+- ★ BitePal — камера: галерея слева от затвора, ручной ввод справа · `3-add-bitepal-camera-gallery-manual.jpg` · [mobbin](https://mobbin.com/screens/6aa57cd2-61ec-4a1d-bda4-32c476090dc2)
+- Bevel — «What are you eating?», Capture / Import photo · `3-add-bevel-capture-import.jpg` · [mobbin](https://mobbin.com/screens/047a259e-6018-41ad-b856-e944c631e14d)
+- Lifesum — Quick track: название, ккал, тип приёма, БЖУ · `3-add-lifesum-quick-track-form.jpg` · [mobbin](https://mobbin.com/screens/f9dc6363-f829-4dc9-8240-f69150f5eba6)
+- BitePal — ручная форма, поля справа с единицами · `3-add-bitepal-manual-form.jpg` · [mobbin](https://mobbin.com/screens/8dee346e-fc88-4833-9de9-09d6c3a97211)
