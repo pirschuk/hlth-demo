@@ -69,14 +69,10 @@ function MealRepeatSheet({ data }) {
         s.date = date;
         s.sheet = null;
         const top = s.stacks.stats.at(-1);
-        typeof top === "string" && top.startsWith(MP_PREFIX)
-          ? (s.stacks.stats[s.stacks.stats.length - 1] = MP_PREFIX + type)
-          : typeof top === "string" &&
-            top.startsWith("nutrition-") &&
-            ((s.tab = "stats"),
-            (s.stacks.stats =
-              mpPaged(s) ? ["stats", "detail-meal", MP_PREFIX + type] : ["stats", "detail-meal"]),
-            (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null));
+        typeof top === "string" &&
+          top.startsWith("nutrition-") &&
+          ((s.tab = "stats"), (s.stacks.stats = ["stats", "detail-meal"]), (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null));
+        mlReveal(s, type);
         s.toast = s.toastPill = date === sl ? `${type} добавлен на сегодня` : `${type} добавлен на ${_p(date)}`;
         s.toastIcon = "toast.check-circle";
       });

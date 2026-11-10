@@ -1,34 +1,35 @@
 /* =====================================================================
- * Вариант экрана «Приёмы пищи»: карточки приёмов → страница приёма.
- * По макету 2026-11-09 (главная + «Завтрак»). Переключается в панели
- * «Поведение → Экран «Приёмы пищи»» (state.controls.mealList:
- * "groups" — группы с блюдами; "blocks" — этот вариант; "hybrid" — блоки с блюдами, см. внизу).
- *
- *  - Главная: календарь, общий виджет «Питание», карточка на каждый приём:
- *    название + бейдж с количеством блюд, БЖУ слева, ккал справа.
- *    Карточка целиком открывает страницу приёма; пустой приём — сразу
- *    добавление с выбранным типом. Плавающий «+» — общее добавление.
- *  - Страница приёма (экран стека `meal-page:<Приём>`): заголовок,
- *    иконка «Повторить» справа (шторка дублирования), итог ккал и БЖУ,
- *    список блюд, плавающий «+» — добавить в этот приём.
+ * Экран «Приёмы пищи» — варианты без отдельных экранов приёма
+ * (решение владельца 2026-11-10: в приёме редко больше 5 блюд, отдельные
+ * страницы приёма не рассматриваем). Переключатель «Поведение → Экран
+ * «Приёмы пищи»» (state.controls.mealList):
+ *   "accordion" — A: блок на каждый приём, свёрнут до итога (ккал, БЖУ,
+ *                 число блюд); касание шапки раскрывает блюда и действия
+ *                 «Добавить» / «Повторить». Раскрытые запоминаются
+ *                 (state.mealOpen); после добавления приём раскрывается.
+ *   "open"      — B: блоки всегда раскрыты, действия — иконками в шапке
+ *                 (повторить, «+» в этот приём).
+ *   "feed"      — C: как BitePal — одна лента дня по времени, приём —
+ *                 подпись в строке; добавление — общим «+».
+ *   "groups"    — исходные группы приложения (MealGroup).
+ * Не из DS: компактная строка блюда (основа — [-My food] -list),
+ * раскрывающийся блок (ближе всего Cell с шевроном).
  * ===================================================================== */
 
-var MP_PREFIX = "meal-page:";
-var MP_MACROS = [
-  ["proteins", "Белки"],
-  ["fats", "Жиры"],
-  ["carbs", "Углеводы"],
-];
-
 function mpVariant(s) {
-  return s.controls.mealList ?? "groups";
+  return s.controls.mealList ?? "accordion";
 }
-/* режимы, где у приёма есть своя страница (после добавления возвращаемся на неё) */
-function mpPaged(s) {
-  return ["blocks", "hybrid"].includes(mpVariant(s));
+function mlShown(s, list) {
+  const v = mpVariant(s);
+  return v !== "groups" && s.controls.view !== "empty" && (v !== "feed" || list.length > 0);
 }
 function mpItems(s, meal) {
   return $f(s, "meal").filter((e) => (e.meal || "Перекус") === meal);
+}
+/* раскрыть приём (вызывается внутри N.update/N.run) */
+function mlReveal(s, meal) {
+  const open = s.mealOpen || [];
+  open.includes(meal) || (s.mealOpen = [...open, meal]);
 }
 function mpAddTo(meal) {
   N.update((s) => {
@@ -36,150 +37,12 @@ function mpAddTo(meal) {
   });
   N.go("nutrition-add", "stats");
 }
-function mpOpen(meal) {
-  N.go(MP_PREFIX + meal);
+function mlCount(nn) {
+  return `${nn} ${nn % 10 === 1 && nn % 100 !== 11 ? "блюдо" : [2, 3, 4].includes(nn % 10) && ![12, 13, 14].includes(nn % 100) ? "блюда" : "блюд"}`;
 }
 
-/* ---------- главная: карточка на каждый приём ---------- */
-function MealBlocks() {
-  const st = we();
-  return n.jsx("div", {
-    className: "mp-blocks",
-    children: MF_TYPES.map((meal) => {
-      const items = mpItems(st, meal),
-        t = msTotals(items),
-        count = items.filter((e) => !e.recognizeError).length;
-      return n.jsxs(
-        "button",
-        {
-          type: "button",
-          className: `mp-card ${count ? "" : "is-blank"}`,
-          onClick: () => (count ? mpOpen(meal) : mpAddTo(meal)),
-          "aria-label": count
-            ? `${meal}: ${count} ${count === 1 ? "блюдо" : count < 5 ? "блюда" : "блюд"}, ${Math.round(t.calories)} ккал`
-            : `${meal}: нет записей. Добавить`,
-          children: [
-            n.jsxs("span", {
-              className: "mp-card-title",
-              children: [
-                n.jsx($, { token: "answer0L", children: meal }),
-                count > 0 && n.jsx("span", { className: "mp-badge", children: count }),
-              ],
-            }),
-            count
-              ? n.jsxs("span", {
-                  className: "mp-card-row",
-                  children: [
-                    n.jsx(MsDots, { values: t, token: "answer1M", className: "ms-dots mp-card-dots" }),
-                    n.jsxs($, { token: "answer1M", className: "mp-card-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
-                  ],
-                })
-              : n.jsx($, { token: "answer1M", className: "mp-card-kcal", children: "Нет записей" }),
-          ],
-        },
-        meal,
-      );
-    }),
-  });
-}
-
-/* ---------- страница приёма ---------- */
-function MealPage({ meal }) {
-  const st = we(),
-    items = mpItems(st, meal),
-    t = msTotals(items);
-  return n.jsxs("div", {
-    className: "mp-page",
-    children: [
-      n.jsxs("header", {
-        className: "mp-head",
-        children: [
-          n.jsx("button", {
-            className: "icon-button",
-            "aria-label": "Назад",
-            onClick: () => N.back(),
-            children: n.jsx(Q, { name: "main.icons.chevron_left", size: 24 }),
-          }),
-          n.jsx("h1", { children: meal }),
-          t.count > 0
-            ? n.jsx("button", {
-                className: "mp-repeat",
-                "aria-label": `Повторить ${meal.toLowerCase()}`,
-                onClick: () => N.sheet("meal-repeat", { date: st.date, meal }),
-                children: n.jsx(MrRepeatIcon, { size: 24 }),
-              })
-            : n.jsx("span", {}),
-        ],
-      }),
-      n.jsxs("div", {
-        className: "scroll mp-scroll",
-        children: [
-          n.jsxs("section", {
-            className: "mp-total",
-            "aria-label": `Итого: ${Math.round(t.calories)} ккал`,
-            children: [
-              n.jsxs("div", {
-                className: "mp-total-kcal",
-                children: [
-                  n.jsx($, { token: "widget1Headline", children: rt(Math.round(t.calories)) }),
-                  n.jsx($, { token: "widget2Headline", className: "ms-muted", children: "ккал" }),
-                ],
-              }),
-              n.jsx("div", {
-                className: "mp-total-macros",
-                children: MP_MACROS.map(([k, l]) =>
-                  n.jsxs(
-                    "div",
-                    {
-                      children: [
-                        n.jsxs("span", {
-                          className: "mp-macro-label",
-                          children: [n.jsx("i", { style: { background: MS_COLORS[k] } }), n.jsx($, { token: "answer1M", children: l })],
-                        }),
-                        n.jsxs("span", {
-                          className: "mp-macro-value",
-                          children: [
-                            n.jsx($, { token: "number1L", children: msG(t[k]) }),
-                            n.jsx($, { token: "answer1M", className: "ms-muted", children: "г" }),
-                          ],
-                        }),
-                      ],
-                    },
-                    k,
-                  ),
-                ),
-              }),
-            ],
-          }),
-          items.length
-            ? n.jsx("div", {
-                className: "meal-history-list",
-                children: items.map((G) => n.jsx(MsMealRow, { entry: G }, G.id)),
-              })
-            : n.jsx("div", { className: "card native-manual-empty", children: "Нет добавленных данных" }),
-        ],
-      }),
-      n.jsx("button", {
-        className: "native-detail-add",
-        "aria-label": `Добавить в ${meal.toLowerCase()}`,
-        onClick: () => mpAddTo(meal),
-        children: "+",
-      }),
-    ],
-  });
-}
-
-/* =====================================================================
- * Гибрид (state.controls.mealList = "hybrid"): всё на одном экране.
- * Блок приёма всегда раскрыт: шапка «Завтрак · N  ккал ›» → страница приёма
- * (повтор, итоги, «+»), под ней блюда компактными строками → карточка блюда.
- * Больше MH_LIMIT блюд — первые MH_LIMIT и «Ещё N ›» → страница приёма.
- * Пустой приём — строка «Добавить» с выбранным типом.
- * MH_LIMIT = 3 — допущение (не из ТЗ). Компактная строка — не из DS
- * (основа — [-My food] -list: название, ккал справа, вторая строка серым).
- * ===================================================================== */
-var MH_LIMIT = 3;
-function MhRow({ entry: e }) {
+/* компактная строка блюда */
+function MhRow({ entry: e, meal }) {
   if (e.recognizing || e.recognizeError) return n.jsx(MealRecognitionRow, { entry: e });
   return n.jsxs("button", {
     type: "button",
@@ -190,58 +53,130 @@ function MhRow({ entry: e }) {
         className: "mh-row-copy",
         children: [
           n.jsx($, { token: "assastiveTextL", className: "mh-row-name", children: e.name }),
-          n.jsxs($, { token: "number3M", className: "ms-muted", children: [e.time, " · ", rt(Math.round(e.grams || 100)), " ", e.unit || "г"] }),
+          n.jsxs($, {
+            token: "number3M",
+            className: "ms-muted",
+            children: [meal ? `${e.meal || "Перекус"} · ` : "", e.time, " · ", rt(Math.round(e.grams || 100)), " ", e.unit || "г"],
+          }),
         ],
       }),
       n.jsxs($, { token: "number2L", className: "mh-row-kcal", children: [rt(Math.round(e.value)), " ккал"] }),
     ],
   });
 }
-function MealHybrid() {
-  const st = we();
-  return n.jsx("div", {
-    className: "mp-blocks mh-blocks",
-    children: MF_TYPES.map((meal) => {
-      const items = mpItems(st, meal),
-        t = msTotals(items),
-        count = items.filter((e) => !e.recognizeError).length,
-        more = items.length - MH_LIMIT;
-      return n.jsxs(
-        "section",
-        {
-          className: "mh-card",
-          "aria-label": meal,
-          children: [
-            n.jsxs("button", {
+function MlIcon({ label, onClick, children }) {
+  return n.jsx("button", { type: "button", className: "ml-icon", "aria-label": label, onClick, children });
+}
+
+/* A и B: блок приёма */
+function MlBlock({ meal, mode }) {
+  const st = we(),
+    items = mpItems(st, meal),
+    t = msTotals(items),
+    count = items.length,
+    open = mode === "open" || (st.mealOpen || []).includes(meal),
+    toggle = () =>
+      N.update((s) => {
+        const o = s.mealOpen || [];
+        s.mealOpen = o.includes(meal) ? o.filter((x) => x !== meal) : [...o, meal];
+      }),
+    repeat = () => N.sheet("meal-repeat", { date: st.date, meal });
+  const summary = n.jsxs("span", {
+    className: "ml-head-copy",
+    children: [
+      n.jsxs("span", {
+        className: "ml-head-line",
+        children: [
+          n.jsx($, { token: "answer0L", children: meal }),
+          count > 0 && n.jsxs($, { token: "number2L", className: "ml-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
+        ],
+      }),
+      count > 0
+        ? n.jsxs("span", {
+            className: "ml-head-sub",
+            children: [n.jsx($, { token: "number3M", className: "ms-muted", children: mlCount(count) }), n.jsx(MsDots, { values: t, className: "ms-dots" })],
+          })
+        : n.jsx($, { token: "number3M", className: "ms-muted", children: "Нет записей" }),
+    ],
+  });
+  return n.jsxs("section", {
+    className: `mh-card ml-${mode} ${open && count ? "is-open" : ""}`,
+    "aria-label": meal,
+    children: [
+      !count
+        ? n.jsxs("button", {
+            type: "button",
+            className: "ml-head",
+            "aria-label": `${meal}: нет записей. Добавить`,
+            onClick: () => mpAddTo(meal),
+            children: [summary, n.jsx("span", { className: "ml-plus", children: n.jsx(Q, { name: "entry-plus", size: 20 }) })],
+          })
+        : mode === "accordion"
+          ? n.jsxs("button", {
               type: "button",
-              className: "mh-head",
-              onClick: () => (items.length ? mpOpen(meal) : mpAddTo(meal)),
-              "aria-label": items.length ? `${meal}: ${Math.round(t.calories)} ккал. Открыть приём` : `${meal}: нет записей. Добавить`,
+              className: "ml-head",
+              "aria-expanded": open,
+              onClick: toggle,
+              children: [summary, n.jsx("span", { className: "ml-chevron", children: n.jsx(Q, { name: "icon.chevron.down", size: 14 }) })],
+            })
+          : n.jsxs("div", {
+              className: "ml-head",
               children: [
-                n.jsx($, { token: "answer0L", children: meal }),
-                count > 0 && n.jsxs($, { token: "number2L", className: "mh-head-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
-                n.jsx(Q, { name: items.length ? "chevron" : "entry-plus", size: items.length ? 16 : 20 }),
+                summary,
+                n.jsxs("span", {
+                  className: "ml-actions",
+                  children: [
+                    n.jsx(MlIcon, { label: `Повторить ${meal.toLowerCase()}`, onClick: repeat, children: n.jsx(MrRepeatIcon, { size: 20 }) }),
+                    n.jsx(MlIcon, { label: `Добавить в ${meal.toLowerCase()}`, onClick: () => mpAddTo(meal), children: n.jsx(Q, { name: "entry-plus", size: 20 }) }),
+                  ],
+                }),
               ],
             }),
-            count > 1 && n.jsx(MsDots, { values: t, className: "ms-dots mh-dots" }),
-            items.length > 0 &&
+      open &&
+        count > 0 &&
+        n.jsxs("div", {
+          className: "mh-list",
+          children: [
+            items.map((e) => n.jsx(MhRow, { entry: e }, e.id)),
+            mode === "accordion" &&
               n.jsxs("div", {
-                className: "mh-list",
+                className: "ml-foot",
                 children: [
-                  items.slice(0, MH_LIMIT).map((e) => n.jsx(MhRow, { entry: e }, e.id)),
-                  more > 0 &&
-                    n.jsxs("button", {
-                      type: "button",
-                      className: "mh-more",
-                      onClick: () => mpOpen(meal),
-                      children: [n.jsx($, { token: "assastiveTextL", children: `Ещё ${more}` }), n.jsx(Q, { name: "chevron", size: 14 })],
-                    }),
+                  n.jsxs("button", {
+                    type: "button",
+                    onClick: () => mpAddTo(meal),
+                    children: [n.jsx(Q, { name: "entry-plus", size: 18 }), n.jsx($, { token: "assastiveTextL", children: "Добавить" })],
+                  }),
+                  n.jsxs("button", {
+                    type: "button",
+                    onClick: repeat,
+                    children: [n.jsx(MrRepeatIcon, { size: 18 }), n.jsx($, { token: "assastiveTextL", children: "Повторить" })],
+                  }),
                 ],
               }),
           ],
-        },
-        meal,
-      );
-    }),
+        }),
+    ],
+  });
+}
+
+/* C: лента дня */
+function MlFeed() {
+  const st = we(),
+    items = [...$f(st, "meal")].sort((a, b) => (b.time || "").localeCompare(a.time || ""));
+  return n.jsx("section", {
+    className: "mh-card ml-feed",
+    "aria-label": "Съедено за день",
+    children: n.jsx("div", { className: "mh-list", children: items.map((e) => n.jsx(MhRow, { entry: e, meal: !0 }, e.id)) }),
+  });
+}
+
+function MealListAlt() {
+  const st = we(),
+    v = mpVariant(st);
+  if (v === "feed") return n.jsx("div", { className: "mp-blocks", children: n.jsx(MlFeed, {}) });
+  return n.jsx("div", {
+    className: "mp-blocks",
+    children: MF_TYPES.map((meal) => n.jsx(MlBlock, { meal, mode: v }, meal)),
   });
 }

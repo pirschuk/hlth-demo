@@ -416,15 +416,8 @@ function MealCard({ data }) {
           (s.date = e.date),
           (s.lastMealType = e.meal),
           (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null),
-          (() => {
-            const page = s.stacks.stats.indexOf(MP_PREFIX + e.meal);
-            s.stacks.stats =
-              page >= 0
-                ? s.stacks.stats.slice(0, page + 1)
-                : mpPaged(s)
-                  ? ["stats", "detail-meal", MP_PREFIX + e.meal]
-                  : ["stats", "detail-meal"];
-          })(),
+          (s.stacks.stats = ["stats", "detail-meal"]),
+          mlReveal(s, e.meal),
           (s.toast = s.toastPill = `Добавлено в ${e.meal.toLowerCase()}: ${e.name}`),
           (s.toastIcon = "toast.check-circle");
       })) || 0;

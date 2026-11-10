@@ -16108,8 +16108,6 @@ function fg({ screen: c }) {
     v = V.useRef(null);
   if (c.startsWith("nutrition-") || c === "activity-search")
     return n.jsx(rg, { screen: c });
-  if (c.startsWith(MP_PREFIX))
-    return n.jsx(MealPage, { meal: c.slice(MP_PREFIX.length) });
   const x = c.startsWith("detail-"),
     j = x ? c.replace("detail-", "") : "meal",
     k = o.controls.view === "empty" ? [] : $f(o, j),
@@ -16188,8 +16186,8 @@ function fg({ screen: c }) {
             (k.length > 0 || o.goals[j] > 0) &&
               o.controls.view !== "empty" &&
               n.jsx(_u, { kind: j, compact: !0 }),
-            j === "meal" && mpPaged(o) && o.controls.view !== "empty"
-              ? n.jsx(mpVariant(o) === "hybrid" ? MealHybrid : MealBlocks, {})
+            j === "meal" && mlShown(o, k)
+              ? n.jsx(MealListAlt, {})
               : k.length
               ? g.map((w) =>
                   j === "meal"
@@ -17328,15 +17326,16 @@ function gg() {
                       "Экран «Приёмы пищи»",
                       n.jsx("select", {
                         "aria-label": "Экран «Приёмы пищи»",
-                        value: c.controls.mealList ?? "groups",
+                        value: c.controls.mealList ?? "accordion",
                         onChange: (h) =>
                           k((g) => {
                             g.mealList = h.target.value;
                           }),
                         children: [
-                          ["groups", "Группы с блюдами"],
-                          ["blocks", "Блоки → страница приёма"],
-                          ["hybrid", "Гибрид: блоки с блюдами"],
+                          ["accordion", "A · Раскрывающиеся блоки"],
+                          ["open", "B · Открытые блоки, действия в шапке"],
+                          ["feed", "C · Лента дня без групп"],
+                          ["groups", "Исходные группы"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
                         ),
