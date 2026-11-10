@@ -230,7 +230,7 @@ function MealAddScreen() {
     saved = (p) => p.own || st.favorites.includes(p.id),
     favs = maFavorites(st),
     recent = maRecent(st).slice(0, MA_RECENT_LIMIT),
-    [choose, setChoose] = V.useState(!chosen),
+    [choose, setChoose] = V.useState(!chosen && mvTypePlace(st) === "entry"),
     [q, setQ] = V.useState(""),
     qq = q.trim().toLowerCase(),
     results = qq ? maSearchAll(st, qq) : null,
@@ -246,9 +246,9 @@ function MealAddScreen() {
     chooser:
       choose &&
       n.jsx(MaChooser, {
-        current: chosen || st.lastMealType,
+        current: chosen || st.lastMealType || type,
         onPick: (t) => (maSetType(t), setChoose(!1)),
-        onClose: () => (chosen ? setChoose(!1) : N.back()),
+        onClose: () => (chosen || mvTypePlace(st) !== "entry" ? setChoose(!1) : N.back()),
       }),
   };
   if (variant !== "main") return n.jsx(MaVariant, { variant, ctx });
@@ -271,11 +271,10 @@ function MealAddScreen() {
   return n.jsxs("div", {
     className: "native-diary-page mv-sheet-page ma-main-page",
     children: [
-      n.jsx(MvFrameHead, { title: "Добавить блюдо" }),
+      n.jsx(MvAddHead, { ctx }),
       n.jsxs("div", {
         className: "native-catalog-surface mv-sheet",
         children: [
-          n.jsx(MvTypeChip, { ctx }),
           n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт", camera: !0 }) }),
           n.jsx("div", {
             className: "scroll ma-list mv-sheet-list",
@@ -295,7 +294,6 @@ function MealAddScreen() {
               }),
             }),
           }),
-          n.jsx(MvTypeFooter, { ctx }),
         ],
       }),
       ctx.chooser,

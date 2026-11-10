@@ -479,8 +479,9 @@ function MealCard({ data }) {
       mfToast("Блюдо добавлено в «Мои блюда»", "toast.heart");
     };
 
-  /* шапка */
-  const header = n.jsxs("header", {
+  /* шапка; в варианте B приём — в нижней панели, в шапке только дата и время */
+  const barTypes = mode !== "entry" && (st.controls.typePlace ?? "title") === "bar",
+    header = n.jsxs("header", {
     className: "mf-header",
     children: [
       n.jsx(MfIconButton, {
@@ -498,12 +499,12 @@ function MealCard({ data }) {
           n.jsxs("span", {
             className: "mf-type-main",
             children: [
-              n.jsx(Q, { name: "icon.food.fork_knife", size: 20 }),
-              n.jsx($, { token: "assastiveTextL", children: when.type }),
+              n.jsx(Q, { name: barTypes ? "ic.statistic.sleep.picker.clock" : "icon.food.fork_knife", size: 20 }),
+              n.jsx($, { token: "assastiveTextL", children: barTypes ? `${dayLabel}, ${when.time}` : when.type }),
               n.jsx(Q, { name: "icon.chevron.down", size: 12 }),
             ],
           }),
-          n.jsx($, { token: "number3M", className: "mf-type-sub", children: `${dayLabel}, ${when.time}` }),
+          !barTypes && n.jsx($, { token: "number3M", className: "mf-type-sub", children: `${dayLabel}, ${when.time}` }),
         ],
       }),
       n.jsxs("div", {
@@ -744,6 +745,16 @@ function MealCard({ data }) {
         className: "mf-bar",
         children: [
           valuesOk && n.jsx(MfSummary, { kcal: totals.calories, grams: eatenN, values: totals }),
+          /* вариант B «Где менять приём»: SegmentedControl над кнопкой */
+          barTypes &&
+            n.jsx("div", {
+              className: "mf-seg mf-bar-types",
+              role: "radiogroup",
+              "aria-label": "Приём пищи",
+              children: MF_TYPES.map((t) =>
+                n.jsx("button", { type: "button", role: "radio", "aria-checked": t === when.type, onClick: () => setWhen((w) => ({ ...w, type: t })), children: t }, t),
+              ),
+            }),
           n.jsx(re, {
             className: "mf-primary",
             disabled: !canAdd,

@@ -661,3 +661,17 @@
   top: auto;
   bottom: 180px;
 }
+
+/* вариант B «Где менять приём»: сегменты приёма в нижней панели карточки */
+.mf-seg.mf-bar-types {
+  margin: 0;
+  gap: 6px;
+}
+.mf-seg.mf-bar-types button {
+  flex: 1;
+  padding: 0;
+  height: 36px;
+}
+.mf-seg.mf-bar-types button[aria-checked="false"] {
+  background: var(--swift-white);
+}

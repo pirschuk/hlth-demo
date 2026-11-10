@@ -17307,15 +17307,15 @@ function gg() {
                       "Где менять приём",
                       n.jsx("select", {
                         "aria-label": "Где менять приём",
-                        value: c.controls.typePlace ?? "chip",
+                        value: c.controls.typePlace ?? "title",
                         onChange: (h) =>
                           k((g) => {
                             g.typePlace = h.target.value;
                           }),
                         children: [
-                          ["chip", "Плашка над поиском"],
-                          ["footer", "Плашка внизу шторки"],
-                          ["card", "Только в карточке блюда"],
+                          ["title", "A · Приём — заголовок экрана"],
+                          ["bar", "B · В карточке у кнопки «Добавить»"],
+                          ["entry", "C · Шторка на входе"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
                         ),
