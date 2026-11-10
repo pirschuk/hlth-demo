@@ -324,3 +324,133 @@
 .ma-group:first-child {
   margin-top: 8px;
 }
+
+/* ===== Итерация 5: визуал (реф. MacroFactor, Lovi, Jomo) ===== */
+.ma-page.ma-soft {
+  background: url(../assets/Gradient_BG3.png) center top / cover;
+}
+.ma-soft .ma-header {
+  padding: 8px 16px 8px;
+}
+.ma-soft .ma-title {
+  justify-self: center;
+}
+.ma-soft .ma-header .mf-icon-btn {
+  background: #ffffffcc;
+  box-shadow: none;
+}
+/* поле поиска + камера в одну строку */
+.ma-search-row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 16px 0;
+}
+.ma-soft .ma-search {
+  flex: 1;
+  margin: 0;
+  height: 56px;
+  border-radius: 20px;
+  background: var(--swift-white);
+  box-shadow: 0 6px 20px #0029840f, inset 0 0 0 1px #ffffff;
+}
+.ma-soft .ma-search:focus-within {
+  box-shadow: 0 6px 20px #0029841a, inset 0 0 0 1.5px var(--swift-blue100);
+}
+.ma-soft > .ma-search {
+  margin: 8px 16px 0;
+}
+.ma-cam {
+  flex: 0 0 56px;
+  height: 56px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--swift-blue100);
+  box-shadow: 0 8px 20px #2b6cfc40;
+}
+.ma-cam .icon {
+  filter: brightness(0) invert(1);
+}
+.ma-cam:active {
+  transform: scale(0.96);
+  background: var(--swift-blue120);
+}
+.ma-cam:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+  outline-offset: 3px;
+}
+/* карточки */
+.ma-soft .ma-list {
+  padding-top: 4px;
+  padding-bottom: 32px;
+}
+.ma-soft .native-results-card {
+  background: var(--swift-white);
+  border-radius: 20px;
+  box-shadow: 0 6px 20px #0029840d;
+  outline: 0;
+}
+.ma-links {
+  margin-top: 16px;
+  background: var(--swift-white);
+  border-radius: 20px;
+  box-shadow: 0 6px 20px #0029840d;
+  overflow: hidden;
+}
+.ma-link {
+  width: 100%;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  text-align: left;
+  color: var(--swift-mainText);
+}
+.ma-link + .ma-link {
+  box-shadow: inset 0 1px var(--swift-divider1);
+}
+.ma-link:active {
+  background: var(--swift-blueSelectionBackground);
+}
+.ma-link > :last-child {
+  margin-left: auto;
+  color: var(--swift-greyChevron);
+}
+.ma-link-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--swift-blue10);
+  color: var(--swift-blue100);
+}
+.ma-link-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ma-soft .ma-list > .ma-caption {
+  margin: 24px 4px 8px;
+  color: var(--swift-secondaryText);
+}
+.ma-soft .ma-group > .ma-caption {
+  background: transparent;
+  color: var(--swift-secondaryText);
+}
+.ma-soft .ma-search {
+  min-width: 0;
+}
+.ma-soft > .ma-search {
+  flex: 0 0 56px;
+}
+/* пустые состояния на градиенте — в белой карточке */
+.ma-soft .ma-empty {
+  margin-top: 16px;
+  padding: 24px 16px;
+  border-radius: 20px;
+  background: var(--swift-white);
+  box-shadow: 0 6px 20px #0029840d;
+}
