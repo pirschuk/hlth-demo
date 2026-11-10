@@ -13217,6 +13217,8 @@ function ha({ title: c, back: o = !1, right: f }) {
 }
 function La({ children: c }) {
   const o = we();
+  /* экран «Добавить блюдо» рисует свои состояния загрузки и ошибки (meal-add.js) */
+  if (N.screen() === "nutrition-add") return c;
   return o.controls.view === "loading"
     ? n.jsx("div", {
         className: "skeletons",
@@ -15346,8 +15348,7 @@ function rg({ screen: c }) {
     [f, d] = V.useState(""),
     v = c === "activity-search",
     x = c === "nutrition-own" || c === "nutrition-favorites";
-  if (c === "nutrition-add")
-    return mtVariant(o) === "ds" ? n.jsx(MealAddScreen, {}) : n.jsx(MealAddTest, {});
+  if (c === "nutrition-add") return n.jsx(MealAddScreen, {});
   if (c === "nutrition-add-legacy")
     return n.jsxs(n.Fragment, {
       children: [
@@ -17260,28 +17261,6 @@ function gg() {
                             children: "Нет данных",
                           }),
                         ],
-                      }),
-                    ],
-                  }),
-                  n.jsxs("label", {
-                    className: "panel-label",
-                    children: [
-                      "Экран добавления (тест)",
-                      n.jsx("select", {
-                        "aria-label": "Экран добавления (тест)",
-                        value: c.controls.addTest ?? "ds",
-                        onChange: (h) =>
-                          k((g) => {
-                            g.addTest = h.target.value;
-                          }),
-                        children: [
-                          ["ds", "Основной (компоненты DS)"],
-                          ["phrase", "Тест 1 · Фраза"],
-                          ["deck", "Тест 2 · Карточки"],
-                          ["tiles", "Тест 3 · Плитки"],
-                        ].map(([h, g]) =>
-                          n.jsx("option", { value: h, children: g }, h),
-                        ),
                       }),
                     ],
                   }),

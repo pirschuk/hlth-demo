@@ -1,23 +1,32 @@
 /* =====================================================================
- * Экран «Добавить приём пищи» — добавление одного блюда в выбранный приём.
- * Только компоненты DS (Figma «ЗОЖ приложение (2026)»):
- *   [Food] Header (22926:116978)     — «×» слева; в центре — элемент типа
- *                                      и времени приёма из HAR-710 (шторка
- *                                      MfTypeSheet: тип + барабан);
- *   Search (19318:278360)            — поиск;
- *   SegmentedControl (23461:360783)  — «Недавние / Избранное»;
- *   [-My food] -list (21433:257994)  — строки блюд, скелетон загрузки;
- *   [Food] Button_Add (23368:130470) — три плитки внизу: «Добавить
- *                                      вручную», «Распознать по фото»,
- *                                      «Фото из галереи».
+ * Экран «Добавить блюдо» — добавление ОДНОГО блюда в выбранный приём пищи.
+ * План: plan.md «добавление блюда» (2026-11-10). Компоненты DS (Figma
+ * «ЗОЖ приложение (2026)», KZWzsMm3PXxyLlRxq9Qv8Q):
+ *   [Food] Header (22926:116978)               — «×» и заголовок;
+ *   Chip ×4 (23309:291289)                     — тип приёма, одно касание;
+ *   Search (19318:278360)                      — поиск по каталогу и избранному;
+ *   SegmentedControl (23461:360783)            — «Избранное · N / Недавние»;
+ *   [-Meal Card] meal image card (22113:138305) — плитки блюд (градиент; избранное —
+ *                                                иллюстрация и ♥); касание = добавить;
+ *   [Inner page sceleton] - card (9859:105512)  — загрузка;
+ *   [-Статистика] Error page (7344:83983)       — ошибка каталога;
+ *   [Food] Button_Add (23368:130470), 2 плитки  — «Добавить вручную», «Распознать по фото».
+ * Не из DS: строка «ккал · г» на плитке, галочка-подтверждение после касания.
  *
- * Поиск: на «Недавних» — по всем блюдам (избранные первыми), на
- * «Избранном» — только по избранному.
- * Тип, дата и время хранятся в state.mealDraft* и подставляются в карточку
- * блюда, ручной ввод и распознавание по фото. Предустановка — со страницы
- * приёма (mpAddTo), иначе по времени суток.
+ * Тип приёма от времени не зависит: со страницы приёма — этот приём,
+ * иначе последний выбранный (state.lastMealType), при первом запуске «Завтрак».
+ * Поиск на «Избранном» — только по избранному, иначе по каталогу,
+ * избранному и недавним (избранные первыми).
  * ===================================================================== */
 
+function maType(s) {
+  return s.mealDraftType || s.lastMealType || "Завтрак";
+}
+function maSetType(type) {
+  N.update((s) => {
+    (s.mealDraftType = type), (s.lastMealType = type);
+  });
+}
 function maRecent(s) {
   const seen = new Set(),
     out = [];
@@ -46,199 +55,231 @@ function maFavorites(s) {
 function maUnique(list) {
   return list.filter((p, i, arr) => arr.findIndex((x) => x.name.toLowerCase() === p.name.toLowerCase()) === i);
 }
+function maKcal(p) {
+  return Math.round((p.calories * (p.portion || 100)) / 100);
+}
 
-/* строка [-My food] -list */
-function MaRow({ product: g, saved }) {
-  const grams = g.portion || 100,
-    k = grams / 100;
-  return n.jsxs("button", {
-    className: "native-product-row",
-    onClick: () => (mfHideKeyboard(), N.sheet("product", { product: g, from: saved && g.own ? "own" : "search" })),
+/* добавить одно блюдо с порцией по умолчанию и вернуться к приёму */
+function maAddOne(p, type) {
+  const g = p.portion || 100,
+    k = g / 100,
+    r1 = (v) => Math.round(v * 10) / 10;
+  mfHideKeyboard();
+  N.update((s) => {
+    s.entries.push({
+      id: N.id(),
+      kind: "meal",
+      name: p.name,
+      date: s.mealDraftDate || s.date,
+      time: s.mealDraftTime || s.controls.clock,
+      meal: type,
+      provider: "manual",
+      productId: p.id,
+      grams: g,
+      unit: "г",
+      value: Math.round(p.calories * k),
+      proteins: r1((p.proteins || 0) * k),
+      fats: r1((p.fats || 0) * k),
+      carbs: r1((p.carbs || 0) * k),
+      per100: { calories: p.calories, proteins: p.proteins || 0, fats: p.fats || 0, carbs: p.carbs || 0 },
+    });
+    s.lastMealType = type;
+    const page = s.stacks.stats.indexOf(MP_PREFIX + type);
+    s.tab = "stats";
+    s.stacks.stats =
+      page >= 0
+        ? s.stacks.stats.slice(0, page + 1)
+        : mpVariant(s) === "blocks"
+          ? ["stats", "detail-meal", MP_PREFIX + type]
+          : ["stats", "detail-meal"];
+    s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null;
+    s.toast = s.toastPill = `Добавлено в ${type.toLowerCase()}: ${p.name}`;
+    s.toastIcon = "toast.check-circle";
+  });
+}
+
+var MA_EMPTY = {
+  search: { image: "image.food.not_found", title: "Ничего не найдено", text: "Распознайте блюдо по фото или добавьте вручную." },
+  searchFav: { image: "image.food.not_found", title: "Ничего не найдено", text: "Среди ваших сохранённых блюд нет подходящих результатов." },
+  favorites: {
+    image: "food.favorites.empty",
+    title: "Здесь появятся ваши блюда",
+    text: "Сохраняйте блюда из карточки просмотра — они будут храниться здесь.",
+  },
+  recent: { image: "food.favorites.empty", title: "Здесь появятся последние блюда", text: "Добавленные блюда можно будет выбрать здесь повторно." },
+};
+
+function MaSkeleton() {
+  return n.jsx("div", {
+    className: "ma-grid",
+    "aria-label": "Загрузка",
+    children: [1, 2, 3, 4].map((i) => n.jsxs("div", { className: "ma-card-skeleton", children: [n.jsx("i", {}), n.jsx("b", {}), n.jsx("b", {})] }, i)),
+  });
+}
+function MaError() {
+  return n.jsxs("div", {
+    className: "ma-error",
+    role: "alert",
     children: [
-      n.jsx(Q, { name: saved ? "food-heart" : "food-fork", size: 24 }),
-      n.jsxs("span", {
-        className: "product-row-copy",
-        children: [
-          n.jsx($, { as: "strong", token: "assastiveTextL", children: g.name }),
-          n.jsxs("span", {
-            className: "product-row-macros",
-            children: [
-              n.jsxs($, { token: "number3M", children: [rt(Math.round(g.calories * k)), " ккал · ", rt(Math.round(grams)), " г"] }),
-              ["proteins", "fats", "carbs"].map((w, G) =>
-                n.jsxs(
-                  "span",
-                  {
-                    children: [
-                      n.jsx("i", { style: { background: ["#5A4FF5", "#9245F0", "#F17C59"][G] } }),
-                      n.jsxs($, { token: "number3M", children: [rt(Math.round((g[w] || 0) * k * 10) / 10), " г"] }),
-                    ],
-                  },
-                  w,
-                ),
-              ),
-            ],
+      n.jsx("span", { className: "ma-error-icon", children: n.jsx(Q, { name: "ic.warning.selected", size: 24 }) }),
+      n.jsx($, { as: "h3", token: "answer1L", children: "Не загрузилось" }),
+      n.jsx($, { as: "p", token: "assastiveTextM", className: "ms-muted", children: "Попробуйте обновить страницу, иногда это помогает" }),
+      n.jsx(re, {
+        secondary: !0,
+        className: "ma-error-btn",
+        onClick: () =>
+          N.run("refresh", (s) => {
+            s.controls.view = "content";
           }),
-        ],
+        children: "Обновить",
       }),
     ],
   });
 }
 
-var MA_EMPTY = {
-  search: { image: "image.food.not_found", title: "Ничего не найдено", text: "Среди блюд нет подходящих результатов. Добавьте блюдо вручную." },
-  searchFav: { image: "image.food.not_found", title: "Ничего не найдено", text: "Среди ваших сохранённых блюд нет подходящих результатов." },
-  recent: { image: "food.favorites.empty", title: "Здесь появятся последние блюда", text: "Добавленные блюда можно будет выбрать здесь повторно." },
-  favorites: {
-    image: "food.favorites.empty",
-    title: "Здесь появятся ваши блюда",
-    text: "Сохраняйте блюда из карточки просмотра — они будут храниться здесь и помогут быстрее добавлять приёмы пищи.",
-  },
-};
-
 function MealAddScreen() {
   const st = we(),
-    [query, setQuery] = V.useState(""),
-    [tab, setTab] = V.useState("recent"),
-    [typeSheet, setTypeSheet] = V.useState(!1),
-    when = {
-      type: st.mealDraftType || mfGuessType(st.controls.clock),
-      date: st.mealDraftDate || st.date,
-      time: st.mealDraftTime || st.controls.clock,
-    },
-    dayLabel = mfDayLabel(when.date, sl),
+    type = maType(st),
     saved = (p) => p.own || st.favorites.includes(p.id),
     favs = maFavorites(st),
-    q = query.trim().toLowerCase(),
-    list = q
+    [q, setQ] = V.useState(""),
+    [tab, setTab] = V.useState(() => (favs.length ? "favorites" : "recent")),
+    [done, setDone] = V.useState(null),
+    qq = q.trim().toLowerCase(),
+    list = qq
       ? (tab === "favorites" ? favs : maUnique([...favs, ...maRecent(st), ...st.products]))
-          .filter((p) => p.name.toLowerCase().includes(q))
+          .filter((p) => p.name.toLowerCase().includes(qq))
           .sort((a, b) => (saved(a) ? 0 : 1) - (saved(b) ? 0 : 1))
-      : tab === "recent"
-        ? maRecent(st)
-        : favs,
-    empty = MA_EMPTY[q ? (tab === "favorites" ? "searchFav" : "search") : tab],
-    keyboard = st.controls.keyboard;
-
+      : tab === "favorites"
+        ? favs
+        : maRecent(st),
+    empty = MA_EMPTY[qq ? (tab === "favorites" ? "searchFav" : "search") : tab],
+    keyboard = st.controls.keyboard,
+    view = st.controls.view,
+    tap = (p) => {
+      mfHideKeyboard(), setDone(p.name), setTimeout(() => maAddOne(p, type), 420);
+    };
   return n.jsxs("div", {
-    className: `ma-page ${keyboard ? "with-keyboard" : ""}`,
+    className: "ma-page",
     children: [
-      /* [Food] Header + тип и время приёма (HAR-710) */
+      /* [Food] Header */
       n.jsxs("header", {
-        className: "mf-header ma-header",
+        className: "ma-header",
         children: [
           n.jsx(MfIconButton, { label: "Закрыть", icon: "close", size: 16, onClick: () => (mfHideKeyboard(), N.back()) }),
-          n.jsxs("button", {
-            type: "button",
-            className: "mf-type",
-            "aria-label": `Приём пищи: ${when.type}, ${dayLabel}, ${when.time}. Изменить`,
-            onClick: () => (mfHideKeyboard(), setTypeSheet(!0)),
-            children: [
-              n.jsxs("span", {
-                className: "mf-type-main",
-                children: [
-                  n.jsx(Q, { name: "icon.food.fork_knife", size: 20 }),
-                  n.jsx($, { token: "assastiveTextL", children: when.type }),
-                  n.jsx(Q, { name: "icon.chevron.down", size: 12 }),
-                ],
-              }),
-              n.jsx($, { token: "number3M", className: "mf-type-sub", children: `${dayLabel}, ${when.time}` }),
-            ],
-          }),
+          n.jsx($, { as: "h1", token: "answer1L", children: "Добавить блюдо" }),
           n.jsx("span", {}),
         ],
       }),
-
+      /* Chip ×4 — тип приёма */
+      n.jsx("div", {
+        className: "mf-type-chips ma-chips",
+        role: "radiogroup",
+        "aria-label": "Приём пищи",
+        children: MF_TYPES.map((t) => n.jsx("button", { type: "button", role: "radio", "aria-checked": t === type, onClick: () => maSetType(t), children: t }, t)),
+      }),
       /* Search */
       n.jsxs("label", {
         className: "ma-search",
         children: [
           n.jsx(Q, { name: "search", size: 24 }),
           n.jsx("input", {
-            "aria-label": tab === "favorites" ? "Поиск в избранном" : "Поиск блюда или продукта",
+            "aria-label": tab === "favorites" ? "Найти в избранном" : "Найти блюдо или продукт",
             placeholder: tab === "favorites" ? "Найти в избранном" : "Найти блюдо или продукт",
-            value: query,
-            onChange: (e) => setQuery(e.target.value),
+            value: q,
+            onChange: (e) => setQ(e.target.value),
           }),
-          query &&
+          q &&
             n.jsx("button", {
               type: "button",
               "aria-label": "Очистить поиск",
               onPointerDown: (e) => e.preventDefault(),
-              onClick: () => setQuery(""),
+              onClick: () => setQ(""),
               children: n.jsx(Q, { name: "clear-circle", size: 20 }),
             }),
         ],
       }),
-
       /* SegmentedControl */
       n.jsx("div", {
         className: "mf-seg ma-seg",
         role: "radiogroup",
         "aria-label": "Подборка блюд",
         children: [
+          ["favorites", `Избранное${favs.length ? " · " + favs.length : ""}`],
           ["recent", "Недавние"],
-          ["favorites", "Избранное"],
         ].map(([v, l]) => n.jsx("button", { type: "button", role: "radio", "aria-checked": tab === v, onClick: () => setTab(v), children: l }, v)),
       }),
-
-      /* [-My food] -list */
+      /* [-Meal Card] плитки */
       n.jsx("div", {
         className: "scroll ma-list",
         children:
-          st.controls.view === "loading"
-            ? n.jsx("div", {
-                className: "native-results-card ma-skeleton",
-                "aria-label": "Загрузка",
-                children: [1, 2, 3, 4, 5].map((i) => n.jsxs("div", { children: [n.jsx("i", {}), n.jsx("b", {}), n.jsx("b", {})] }, i)),
-              })
-            : list.length
-              ? n.jsx("div", {
-                  className: "native-results-card",
-                  children: list.map((p) => n.jsx(MaRow, { product: p, saved: saved(p) }, p.id + p.name)),
-                })
-              : n.jsxs("div", {
-                  className: "native-catalog-empty ma-empty",
-                  children: [n.jsx(Q, { name: empty.image, size: 140 }), n.jsx("h3", { children: empty.title }), n.jsx("p", { children: empty.text })],
-                }),
+          view === "loading"
+            ? n.jsx(MaSkeleton, {})
+            : view === "error"
+              ? n.jsx(MaError, {})
+              : list.length
+                ? n.jsx("div", {
+                    className: "ma-grid",
+                    children: list.map((p) => {
+                      const fav = saved(p),
+                        isDone = done === p.name;
+                      return n.jsxs(
+                        "button",
+                        {
+                          type: "button",
+                          className: `ma-meal-card ${fav ? "fav" : ""} ${isDone ? "done" : ""}`,
+                          "aria-label": `Добавить «${p.name}» в ${type.toLowerCase()}, ${maKcal(p)} ккал`,
+                          disabled: !!done,
+                          onClick: () => tap(p),
+                          children: [
+                            n.jsx("span", {
+                              className: "ma-meal-card-icon",
+                              children: isDone
+                                ? n.jsx("span", { className: "ma-check", "aria-hidden": "true", children: "✓" })
+                                : n.jsx(Q, { name: fav ? "food-heart" : "icon.food.fork_knife", size: 20 }),
+                            }),
+                            n.jsx($, { token: "answer1L", className: "ma-meal-card-name", children: p.name }),
+                            n.jsxs($, { token: "number3M", className: "ma-meal-card-meta", children: [rt(maKcal(p)), " ккал · ", rt(p.portion || 100), " г"] }),
+                          ],
+                        },
+                        p.id + p.name,
+                      );
+                    }),
+                  })
+                : n.jsxs("div", {
+                    className: "native-catalog-empty ma-empty",
+                    children: [
+                      n.jsx(Q, { name: empty.image, size: 120 }),
+                      n.jsx("h3", { children: empty.title }),
+                      n.jsx("p", { children: empty.text }),
+                      qq &&
+                        n.jsx(re, {
+                          secondary: !0,
+                          className: "ma-empty-btn",
+                          onClick: () => N.sheet("entry", { kind: "meal", name: q.trim() }),
+                          children: "Добавить вручную",
+                        }),
+                    ],
+                  }),
       }),
-
-      /* [Food] Button_Add — три плитки, внизу */
+      /* [Food] Button_Add, 2 плитки */
       !keyboard &&
         n.jsx("div", {
           className: "ma-methods",
           children: [
             ["icon.food.add_manual", "Добавить вручную", () => N.sheet("entry", { kind: "meal" })],
             ["icon.food.camera", "Распознать по фото", () => N.sheet("camera", { target: "meal" })],
-            ["gallery", "Фото из галереи", () => N.sheet("camera", { target: "meal", gallery: !0 })],
-          ].map(([icon, label, go]) =>
+          ].map(([icon, label, f]) =>
             n.jsxs(
               "button",
               {
                 type: "button",
-                onClick: go,
-                children: [
-                  icon === "gallery"
-                    ? n.jsx("img", { className: "icon", src: "assets/icon.food.gallery.svg", width: 20, height: 20, alt: "" })
-                    : n.jsx(Q, { name: icon, size: 20 }),
-                  n.jsx("span", { children: label }),
-                ],
+                onClick: () => (mfHideKeyboard(), N.update((s) => void (s.mealDraftType = type)), f()),
+                children: [n.jsx(Q, { name: icon, size: 20 }), n.jsx("span", { children: label })],
               },
               label,
             ),
           ),
-        }),
-
-      typeSheet &&
-        n.jsx(MfTypeSheet, {
-          value: when,
-          today: sl,
-          onClose: () => setTypeSheet(!1),
-          onSave: (v) => {
-            N.update((s) => {
-              (s.mealDraftType = v.type), (s.mealDraftDate = v.date), (s.mealDraftTime = v.time);
-            }),
-              setTypeSheet(!1);
-          },
         }),
     ],
   });

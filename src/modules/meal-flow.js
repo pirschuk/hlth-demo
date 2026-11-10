@@ -41,10 +41,6 @@ function mfStr(v) {
 function mfFmt(v) {
   return Number.isFinite(v) ? rt(mfRound(v)) : "–";
 }
-function mfGuessType(clock) {
-  const h = +String(clock || "12:00").slice(0, 2);
-  return h < 11 ? "Завтрак" : h < 16 ? "Обед" : h < 21 ? "Ужин" : "Перекус";
-}
 function mfDayLabel(date, today, long) {
   if (date === today) return "Сегодня";
   if (date === Jn(today, -1)) return "Вчера";
@@ -290,7 +286,7 @@ function MealCard({ data }) {
     [pw, setPw] = V.useState(String(initial.portion)),
     [eaten, setEaten] = V.useState(String(entry?.grams || (mode === "manual" ? 100 : product?.portion || 100))),
     [when, setWhen] = V.useState(() => ({
-      type: entry?.meal || data.meal || st.mealDraftType || mfGuessType(st.controls.clock),
+      type: entry?.meal || data.meal || st.mealDraftType || st.lastMealType || "Завтрак",
       date: entry?.date || data.date || st.mealDraftDate || today,
       time: entry?.time || data.time || st.mealDraftTime || st.controls.clock,
     })),
@@ -418,6 +414,7 @@ function MealCard({ data }) {
           (s.flow = null),
           (s.tab = "stats"),
           (s.date = e.date),
+          (s.lastMealType = e.meal),
           (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null),
           (() => {
             const page = s.stacks.stats.indexOf(MP_PREFIX + e.meal);
@@ -790,7 +787,7 @@ var MF_RECOGNIZED = [
   { name: "Овощной салат с лососем", value: 318, grams: 240, proteins: 22.8, fats: 19.4, carbs: 11.6 },
 ];
 
-function mfStartRecognition(description) {
+function mfStartRecognition() {
   const id = N.id(),
     outcome = N.state.controls.next,
     epoch = N.epoch;
@@ -803,7 +800,7 @@ function mfStartRecognition(description) {
       name: "Идёт распознавание",
       date: s.mealDraftDate || s.date,
       time: s.mealDraftTime || s.controls.clock,
-      meal: s.mealDraftType || mfGuessType(s.controls.clock),
+      meal: s.mealDraftType || s.lastMealType || "Завтрак",
       value: 0,
       grams: 0,
       proteins: 0,
@@ -827,14 +824,13 @@ function mfStartRecognition(description) {
       } else {
         const r = MF_RECOGNIZED[s.entries.filter((x) => x.recognized).length % MF_RECOGNIZED.length];
         Object.assign(e, r, { recognizing: !1, recognized: !0 });
-        description && (e.name = description[0].toUpperCase() + description.slice(1));
       }
     });
     N.log(`recognition: ${outcome === "error" || outcome === "empty" ? "ошибка" : "готово"}`);
   }, Math.max(2500, N.state.controls.delay * 4));
   N.jobs.set(t, () => {});
 }
-function mfUsePhoto(description) {
+function mfUsePhoto() {
   N.update((s) => {
     (s.sheet = null),
       (s.flow = null),
@@ -842,7 +838,7 @@ function mfUsePhoto(description) {
       s.stacks.stats.at(-1) !== "detail-meal" && (s.stacks.stats = ["stats", "detail-meal"]),
       s.mealRecognitionHintHidden || (s.sheet = { kind: "meal-recognition-info", data: {} });
   });
-  mfStartRecognition(typeof description === "string" ? description.trim() : "");
+  mfStartRecognition();
 }
 
 function MealCamera({ gallery }) {
@@ -883,10 +879,10 @@ function MealCamera({ gallery }) {
             className: "mf-camera-controls",
             children: [
               n.jsx("button", {
-                className: "mf-cam-side",
-                "aria-label": "Выбрать из галереи",
+                className: "mf-cam-side round",
+                "aria-label": "Загрузить фото из галереи",
                 onClick: () => setShot(!0),
-                children: n.jsx("img", { src: MF_PHOTO, alt: "" }),
+                children: n.jsx("img", { src: "assets/icon.food.gallery.svg", width: 22, height: 22, alt: "" }),
               }),
               n.jsx("button", {
                 className: "mf-shutter",
