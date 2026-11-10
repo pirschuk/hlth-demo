@@ -17304,6 +17304,27 @@ function gg() {
                   n.jsxs("label", {
                     className: "panel-label",
                     children: [
+                      "Где менять приём",
+                      n.jsx("select", {
+                        "aria-label": "Где менять приём",
+                        value: c.controls.typePlace ?? "chip",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.typePlace = h.target.value;
+                          }),
+                        children: [
+                          ["chip", "Плашка над поиском"],
+                          ["footer", "Плашка внизу шторки"],
+                          ["card", "Только в карточке блюда"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
                       "Экран «Приёмы пищи»",
                       n.jsx("select", {
                         "aria-label": "Экран «Приёмы пищи»",

@@ -301,13 +301,52 @@ function MvBento({ ctx }) {
 /* ---------- «Шторка» (1 + 4 в рамке экрана приложения) ----------
  * Рамка как в «Добавить активность» / «Мои блюда» (скриншоты владельца): градиент,
  * белая квадратная кнопка, заголовок по центру, неподвижная белая шторка.
- * Тип приёма — подзаголовок «на обед ▾» под заголовком → шторка «Что добавляем?».
+ * Тип приёма — см. «Где менять приём» (MvTypeChip / MvTypeFooter / карточка блюда).
  * В шторке: Search закреплён сверху, ниже прокручивается только содержимое:
  * бенто-входы (фото, «Избранное · N», «Вручную») и «Недавние» ≤ 5; при вводе —
  * результаты каталога и избранного. Шторка не двигается ни при вводе, ни при смене приёма.
  */
-const MV_ON = { Завтрак: "на завтрак", Обед: "на обед", Ужин: "на ужин", Перекус: "на перекус" };
-function MvFrameHead({ title, sub, onSub, subLabel, back }) {
+/* Где менять приём (тест, «Поведение → Где менять приём»; state.controls.typePlace):
+ *   "chip"   — плашка «Добавляем в [Обед ▾]» над поиском, слева;
+ *   "footer" — плавающая плашка «Обед · сменить» внизу шторки (прячется при клавиатуре);
+ *   "card"   — на экране приёма нет, меняется в карточке блюда (шапка «Обед ▾»).
+ * Плашки — не из DS (Chip/Tag ближе всего).
+ */
+function mvTypePlace(st) {
+  return st.controls.typePlace ?? "chip";
+}
+function MvTypeChip({ ctx }) {
+  if (mvTypePlace(ctx.st) !== "chip") return null;
+  return n.jsxs("div", {
+    className: "mv-type-chip-row",
+    children: [
+      n.jsx($, { token: "assastiveTextM", className: "ms-muted", children: "Добавляем в" }),
+      n.jsxs("button", {
+        type: "button",
+        className: "mv-type-chip",
+        "aria-label": `Приём пищи: ${ctx.type}. Сменить`,
+        onClick: ctx.openChooser,
+        children: [n.jsx(Q, { name: "food-fork", size: 16 }), n.jsx($, { token: "assastiveTextL", children: ctx.type }), n.jsx(Q, { name: "icon.chevron.down", size: 12 })],
+      }),
+    ],
+  });
+}
+function MvTypeFooter({ ctx }) {
+  if (mvTypePlace(ctx.st) !== "footer" || ctx.st.controls.keyboard) return null;
+  return n.jsxs("button", {
+    type: "button",
+    className: "mv-type-footer",
+    "aria-label": `Приём пищи: ${ctx.type}. Сменить`,
+    onClick: ctx.openChooser,
+    children: [
+      n.jsx(Q, { name: "food-fork", size: 18 }),
+      n.jsx($, { token: "assastiveTextL", children: ctx.type }),
+      n.jsx("i", {}),
+      n.jsx($, { token: "assastiveTextM", className: "mv-type-footer-act", children: "сменить" }),
+    ],
+  });
+}
+function MvFrameHead({ title, sub, back }) {
   return n.jsxs("header", {
     className: "native-flow-header mv-head",
     children: [
@@ -320,16 +359,7 @@ function MvFrameHead({ title, sub, onSub, subLabel, back }) {
       n.jsxs("hgroup", {
         children: [
           n.jsx($, { as: "h1", token: "answer1L", children: title }),
-          sub &&
-            (onSub
-              ? n.jsxs("button", {
-                  type: "button",
-                  className: "mv-head-sub",
-                  "aria-label": subLabel,
-                  onClick: () => (mfHideKeyboard(), onSub()),
-                  children: [n.jsx($, { token: "number3M", children: sub }), n.jsx(Q, { name: "icon.chevron.down", size: 12 })],
-                })
-              : n.jsx($, { token: "number3M", className: "mv-head-note", children: sub })),
+          sub && n.jsx($, { token: "number3M", className: "mv-head-note", children: sub }),
         ],
       }),
     ],
@@ -340,15 +370,11 @@ function MvSheet({ ctx }) {
   return n.jsxs("div", {
     className: "native-diary-page mv-sheet-page",
     children: [
-      n.jsx(MvFrameHead, {
-        title: "Добавить блюдо",
-        sub: MV_ON[type] || type,
-        subLabel: `Приём пищи: ${type}. Сменить`,
-        onSub: ctx.openChooser,
-      }),
+      n.jsx(MvFrameHead, { title: "Добавить блюдо" }),
       n.jsxs("div", {
         className: "native-catalog-surface mv-sheet",
         children: [
+          n.jsx(MvTypeChip, { ctx }),
           n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт" }) }),
           n.jsx("div", {
             className: "scroll ma-list mv-sheet-list",
@@ -397,6 +423,7 @@ function MvSheet({ ctx }) {
               }),
             }),
           }),
+          n.jsx(MvTypeFooter, { ctx }),
         ],
       }),
       ctx.chooser,

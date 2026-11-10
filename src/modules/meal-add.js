@@ -271,10 +271,11 @@ function MealAddScreen() {
   return n.jsxs("div", {
     className: "native-diary-page mv-sheet-page ma-main-page",
     children: [
-      n.jsx(MvFrameHead, { title: "Добавить блюдо", sub: MV_ON[type] || type, subLabel: `Приём пищи: ${type}. Сменить`, onSub: ctx.openChooser }),
+      n.jsx(MvFrameHead, { title: "Добавить блюдо" }),
       n.jsxs("div", {
         className: "native-catalog-surface mv-sheet",
         children: [
+          n.jsx(MvTypeChip, { ctx }),
           n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт", camera: !0 }) }),
           n.jsx("div", {
             className: "scroll ma-list mv-sheet-list",
@@ -294,6 +295,7 @@ function MealAddScreen() {
               }),
             }),
           }),
+          n.jsx(MvTypeFooter, { ctx }),
         ],
       }),
       ctx.chooser,
