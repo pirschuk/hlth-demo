@@ -240,115 +240,63 @@ function MealAddScreen() {
   V.useEffect(() => {
     !st.controls.keyboard && document.activeElement?.closest?.(".ma-page") && document.activeElement.blur();
   }, [st.controls.keyboard]);
-  if (variant !== "main")
-    return n.jsx(MaVariant, {
-      variant,
-      ctx: {
-        st, type, saved, favs, recent, q, setQ, results, view,
-        openChooser: () => (mfHideKeyboard(), setChoose(!0)),
-        chooser:
-          choose &&
-          n.jsx(MaChooser, {
-            current: chosen || st.lastMealType,
-            onPick: (t) => (maSetType(t), setChoose(!1)),
-            onClose: () => (chosen ? setChoose(!1) : N.back()),
-          }),
-      },
+  const ctx = {
+    st, type, saved, favs, recent, q, setQ, results, view,
+    openChooser: () => (mfHideKeyboard(), setChoose(!0)),
+    chooser:
+      choose &&
+      n.jsx(MaChooser, {
+        current: chosen || st.lastMealType,
+        onPick: (t) => (maSetType(t), setChoose(!1)),
+        onClose: () => (chosen ? setChoose(!1) : N.back()),
+      }),
+  };
+  if (variant !== "main") return n.jsx(MaVariant, { variant, ctx });
+  /* «Поле + камера»: рамка как «Мои блюда» (MvFrameHead + неподвижная шторка),
+     камера — кнопка справа от поиска; ниже ссылки «Избранное», «Ввести вручную» и «Недавние». */
+  const link = (icon, title, sub, onClick) =>
+    n.jsxs("button", {
+      type: "button",
+      className: "ma-link",
+      onClick: () => (mfHideKeyboard(), onClick()),
+      children: [
+        n.jsx("span", { className: "ma-link-icon", children: n.jsx(Q, { name: icon, size: 20 }) }),
+        n.jsxs("span", {
+          className: "ma-link-copy",
+          children: [n.jsx($, { token: "answer1L", children: title }), n.jsx($, { token: "number3M", className: "ms-muted", children: sub })],
+        }),
+        n.jsx(Q, { name: "chevron", size: 16 }),
+      ],
     });
   return n.jsxs("div", {
-    className: "ma-page ma-soft",
+    className: "native-diary-page mv-sheet-page ma-main-page",
     children: [
-      n.jsxs("header", {
-        className: "ma-header",
+      n.jsx(MvFrameHead, { title: "Добавить блюдо", sub: MV_ON[type] || type, subLabel: `Приём пищи: ${type}. Сменить`, onSub: ctx.openChooser }),
+      n.jsxs("div", {
+        className: "native-catalog-surface mv-sheet",
         children: [
-          n.jsx(MfIconButton, { label: "Закрыть", icon: "close", size: 16, onClick: () => (mfHideKeyboard(), N.back()) }),
-          n.jsxs("button", {
-            type: "button",
-            className: "ma-title",
-            "aria-label": `Приём пищи: ${type}. Сменить`,
-            onClick: () => (mfHideKeyboard(), setChoose(!0)),
-            children: [n.jsx($, { as: "h1", token: "headline2", children: type }), n.jsx(Q, { name: "icon.chevron.down", size: 14 })],
-          }),
-          n.jsx("span", {}),
-        ],
-      }),
-      n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт", camera: !0 }),
-      n.jsx("div", {
-        className: "scroll ma-list",
-        children:
-          view === "loading"
-            ? n.jsx(MaSkeleton, {})
-            : view === "error"
-              ? n.jsx(MaError, {})
-              : results
-                ? n.jsxs(n.Fragment, {
+          n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт", camera: !0 }) }),
+          n.jsx("div", {
+            className: "scroll ma-list mv-sheet-list",
+            children: n.jsx(MvBody, {
+              ctx,
+              children: n.jsxs(n.Fragment, {
+                children: [
+                  n.jsxs("div", {
+                    className: "ma-links",
                     children: [
-                      n.jsx($, { as: "h3", token: "capsSign", className: "ma-caption", children: "КАТАЛОГ И ИЗБРАННОЕ" }),
-                      results.length
-                        ? n.jsx(MaList, { items: results, saved })
-                        : n.jsx(MaEmpty, {
-                            image: "image.food.not_found",
-                            title: "Ничего не найдено",
-                            text: "В каталоге и избранном нет подходящих блюд.",
-                            action: n.jsx(re, {
-                              secondary: !0,
-                              className: "ma-empty-btn",
-                              onClick: () => (mfHideKeyboard(), N.sheet("entry", { kind: "meal", name: q.trim() })),
-                              children: "Добавить вручную",
-                            }),
-                          }),
-                    ],
-                  })
-                : n.jsxs(n.Fragment, {
-                    children: [
-                      n.jsxs("div", {
-                        className: "ma-links",
-                        children: [
-                          n.jsxs("button", {
-                            type: "button",
-                            className: "ma-link",
-                            onClick: () => N.go("nutrition-favorites"),
-                            children: [
-                              n.jsx("span", { className: "ma-link-icon", children: n.jsx(Q, { name: "heart-fill", size: 20 }) }),
-                              n.jsxs("span", {
-                                className: "ma-link-copy",
-                                children: [
-                                  n.jsx($, { token: "answer1L", children: "Избранное" }),
-                                  n.jsx($, { token: "number3M", className: "ms-muted", children: favs.length ? `${favs.length} ${favs.length % 10 === 1 && favs.length % 100 !== 11 ? "блюдо" : [2, 3, 4].includes(favs.length % 10) && ![12, 13, 14].includes(favs.length % 100) ? "блюда" : "блюд"}` : "пока пусто" }),
-                                ],
-                              }),
-                              n.jsx(Q, { name: "chevron", size: 16 }),
-                            ],
-                          }),
-                          n.jsxs("button", {
-                            type: "button",
-                            className: "ma-link",
-                            onClick: () => N.sheet("entry", { kind: "meal" }),
-                            children: [
-                              n.jsx("span", { className: "ma-link-icon", children: n.jsx(Q, { name: "icon.food.add_manual", size: 20 }) }),
-                              n.jsxs("span", {
-                                className: "ma-link-copy",
-                                children: [
-                                  n.jsx($, { token: "answer1L", children: "Ввести вручную" }),
-                                  n.jsx($, { token: "number3M", className: "ms-muted", children: "название, калории и БЖУ" }),
-                                ],
-                              }),
-                              n.jsx(Q, { name: "chevron", size: 16 }),
-                            ],
-                          }),
-                        ],
-                      }),
-                      n.jsx($, { as: "h3", token: "capsSign", className: "ma-caption", children: "НЕДАВНИЕ" }),
-                      recent.length ? n.jsx(MaList, { items: recent, saved }) : n.jsx(MaEmpty, MA_EMPTY.recent),
+                      link("heart-fill", "Избранное", favs.length ? mvCount(favs.length) : "пока пусто", () => N.go("nutrition-favorites")),
+                      link("icon.food.add_manual", "Ввести вручную", "название, калории и БЖУ", () => N.sheet("entry", { kind: "meal" })),
                     ],
                   }),
+                  n.jsx(MvRecent, { ctx }),
+                ],
+              }),
+            }),
+          }),
+        ],
       }),
-      choose &&
-        n.jsx(MaChooser, {
-          current: chosen || st.lastMealType,
-          onPick: (t) => (maSetType(t), setChoose(!1)),
-          onClose: () => (chosen ? setChoose(!1) : N.back()),
-        }),
+      ctx.chooser,
     ],
   });
 }

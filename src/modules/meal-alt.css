@@ -359,3 +359,20 @@
 .ma-fav-page .ma-group > .ma-caption {
   background: var(--swift-white);
 }
+/* «Поле + камера» в той же рамке: поле и кнопка камеры одной высоты, без теней (обводка как у Search) */
+.mv-sheet-search .ma-search-row {
+  margin: 0;
+}
+.mv-sheet-search .ma-search-row .ma-search {
+  flex: 1;
+  min-width: 0;
+}
+.ma-main-page .mv-sheet-search .ma-cam {
+  border-radius: 16px;
+  box-shadow: none;
+}
+.ma-main-page .ma-links {
+  margin-top: 16px;
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+}
