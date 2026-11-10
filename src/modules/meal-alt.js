@@ -299,28 +299,56 @@ function MvBento({ ctx }) {
 }
 
 /* ---------- «Шторка» (1 + 4 в рамке экрана приложения) ----------
- * Рамка как в «Добавить активность»: native-flow-header (fs: «×» + заголовок),
- * белая шторка native-catalog-surface на градиенте. Внутри: тип приёма —
- * SegmentedControl ×4 (смена в одно касание), Search, бенто-входы (фото,
- * «Избранное · N», «Вручную»), «Недавние» ≤ 5; при вводе — результаты каталога.
+ * Рамка как в «Добавить активность» / «Мои блюда» (скриншоты владельца): градиент,
+ * белая квадратная кнопка, заголовок по центру, неподвижная белая шторка.
+ * Тип приёма — подзаголовок «на обед ▾» под заголовком → шторка «Что добавляем?».
+ * В шторке: Search закреплён сверху, ниже прокручивается только содержимое:
+ * бенто-входы (фото, «Избранное · N», «Вручную») и «Недавние» ≤ 5; при вводе —
+ * результаты каталога и избранного. Шторка не двигается ни при вводе, ни при смене приёма.
  */
+const MV_ON = { Завтрак: "на завтрак", Обед: "на обед", Ужин: "на ужин", Перекус: "на перекус" };
+function MvFrameHead({ title, sub, onSub, subLabel, back }) {
+  return n.jsxs("header", {
+    className: "native-flow-header mv-head",
+    children: [
+      n.jsx("button", {
+        type: "button",
+        "aria-label": back ? "Назад" : "Закрыть",
+        onClick: () => (mfHideKeyboard(), N.back()),
+        children: n.jsx(Q, { name: back ? "back" : "close", size: back ? 20 : 18 }),
+      }),
+      n.jsxs("hgroup", {
+        children: [
+          n.jsx($, { as: "h1", token: "answer1L", children: title }),
+          sub &&
+            (onSub
+              ? n.jsxs("button", {
+                  type: "button",
+                  className: "mv-head-sub",
+                  "aria-label": subLabel,
+                  onClick: () => (mfHideKeyboard(), onSub()),
+                  children: [n.jsx($, { token: "number3M", children: sub }), n.jsx(Q, { name: "icon.chevron.down", size: 12 })],
+                })
+              : n.jsx($, { token: "number3M", className: "mv-head-note", children: sub })),
+        ],
+      }),
+    ],
+  });
+}
 function MvSheet({ ctx }) {
   const { type, favs, q, setQ } = ctx;
   return n.jsxs("div", {
     className: "native-diary-page mv-sheet-page",
     children: [
-      n.jsx(fs, { title: "Добавить блюдо", close: !0 }),
+      n.jsx(MvFrameHead, {
+        title: "Добавить блюдо",
+        sub: MV_ON[type] || type,
+        subLabel: `Приём пищи: ${type}. Сменить`,
+        onSub: ctx.openChooser,
+      }),
       n.jsxs("div", {
         className: "native-catalog-surface mv-sheet",
         children: [
-          n.jsx("div", {
-            className: "mf-seg mv-types",
-            role: "radiogroup",
-            "aria-label": "Приём пищи",
-            children: MF_TYPES.map((t) =>
-              n.jsx("button", { type: "button", role: "radio", "aria-checked": t === type, onClick: () => maSetType(t), children: t }, t),
-            ),
-          }),
           n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт" }) }),
           n.jsx("div", {
             className: "scroll ma-list mv-sheet-list",
@@ -345,7 +373,7 @@ function MvSheet({ ctx }) {
                       n.jsxs("button", {
                         type: "button",
                         className: "mv-tile fav",
-                        onClick: () => N.go("nutrition-favorites"),
+                        onClick: () => (mfHideKeyboard(), N.go("nutrition-favorites")),
                         children: [
                           n.jsx("span", { className: "ma-link-icon", children: n.jsx(Q, { name: "heart-fill", size: 20 }) }),
                           n.jsx($, { token: "answer1L", children: "Избранное" }),

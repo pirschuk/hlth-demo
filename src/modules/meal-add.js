@@ -372,29 +372,15 @@ function MealFavoritesScreen() {
       const el = scroller.current?.querySelector(`[data-letter="${l}"]`);
       el && (scroller.current.scrollTop = el.offsetTop - scroller.current.offsetTop);
     };
+  /* рамка как «Мои блюда» (скриншот владельца): градиент, «‹» в белом квадрате, белая шторка */
   return n.jsxs("div", {
-    className: "ma-page ma-soft",
+    className: "native-diary-page mv-sheet-page ma-fav-page",
     children: [
-      n.jsxs("header", {
-        className: "ma-header",
+      n.jsx(MvFrameHead, { title: "Избранное", sub: all.length ? mvCount(all.length) : "", back: !0 }),
+      n.jsxs("div", {
+        className: "native-catalog-surface mv-sheet",
         children: [
-          n.jsx("button", {
-            className: "icon-button",
-            "aria-label": "Назад",
-            onClick: () => (mfHideKeyboard(), N.back()),
-            children: n.jsx(Q, { name: "main.icons.chevron_left", size: 24 }),
-          }),
-          n.jsxs("div", {
-            className: "ma-fav-title",
-            children: [
-              n.jsx($, { as: "h1", token: "answer0L", children: "Избранное" }),
-              n.jsx($, { token: "number3M", className: "ms-muted", children: `${all.length} ${all.length % 10 === 1 && all.length % 100 !== 11 ? "блюдо" : [2, 3, 4].includes(all.length % 10) && ![12, 13, 14].includes(all.length % 100) ? "блюда" : "блюд"}` }),
-            ],
-          }),
-          n.jsx("span", {}),
-        ],
-      }),
-      all.length > 0 && n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти в избранном" }),
+      all.length > 0 && n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо по названию" }) }),
       n.jsxs("div", {
         className: "ma-fav-body",
         children: [
@@ -405,7 +391,9 @@ function MealFavoritesScreen() {
               ? n.jsx(MaEmpty, MA_EMPTY.favorites)
               : !list.length
                 ? n.jsx(MaEmpty, { image: "image.food.not_found", title: "Ничего не найдено", text: "В избранном нет подходящих блюд. Попробуйте найти в каталоге." })
-                : groups.map((g) =>
+                : !index
+                  ? n.jsx(MaList, { items: list, saved: () => !0 })
+                  : groups.map((g) =>
                     n.jsxs(
                       "section",
                       {
@@ -426,6 +414,8 @@ function MealFavoritesScreen() {
               "aria-label": "Буквы",
               children: groups.map((g) => n.jsx("button", { type: "button", onClick: () => jump(g.l), children: g.l }, g.l)),
             }),
+        ],
+      }),
         ],
       }),
     ],

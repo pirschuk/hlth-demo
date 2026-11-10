@@ -261,23 +261,12 @@
 }
 
 /* ---------- «Шторка» ---------- */
-.mv-sheet-page .native-flow-header h1 {
-  font: var(--swift-answer1L);
-}
 .mv-sheet {
   padding-top: 16px;
 }
-.mf-seg.mv-types {
-  margin: 0 16px;
-  gap: 6px;
-}
-.mf-seg.mv-types button {
-  flex: 1;
-  padding: 0;
-  height: 36px;
-}
 .mv-sheet-search {
-  padding: 12px 16px 0;
+  flex-shrink: 0;
+  padding: 0 16px 4px;
 }
 .mv-sheet-search .ma-search {
   margin: 0;
@@ -299,32 +288,15 @@
 .native-diary-page.mv-sheet-page {
   background: linear-gradient(115deg, #f1f6d8 0%, #ddf1ec 40%, #c4e6f6 100%);
 }
-.mv-sheet-page .native-flow-header {
-  align-items: center;
-  height: 64px;
-  min-height: 64px;
-  padding: 4px 16px 12px;
-}
 .mv-sheet-page .native-flow-header > button {
   background: var(--swift-white);
   border-radius: 12px;
   color: var(--swift-blue100);
 }
-.mv-sheet-page .native-flow-header h1 {
-  position: absolute;
-  left: 64px;
-  right: 64px;
-  text-align: center;
-  margin: 0;
-}
 .native-catalog-surface.mv-sheet {
   background: var(--swift-white);
   border-radius: 24px 24px 0 0;
   padding-top: 20px;
-}
-.mv-sheet-page .native-flow-header h1 {
-  top: 4px;
-  line-height: 40px;
 }
 /* градиент под строкой состояния, как на макете */
 .phone-screen:has(.mv-sheet-page) {
@@ -333,4 +305,57 @@
 .phone-screen:has(.mv-sheet-page) .status-bar,
 .phone-screen:has(.mv-sheet-page) .phone-content {
   background: transparent;
+}
+
+/* заголовок рамки: «×»/«‹» в белом квадрате, заголовок + подзаголовок по центру.
+   Высота фиксирована — шторка не сдвигается при смене приёма. */
+.mv-sheet-page .native-flow-header.mv-head {
+  height: 72px;
+  min-height: 72px;
+  padding: 4px 16px 16px;
+  align-items: flex-start;
+}
+.mv-head > hgroup {
+  position: absolute;
+  left: 64px;
+  right: 64px;
+  top: 4px;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+.phone-screen .mv-head h1 {
+  position: static;
+  margin: 0;
+  line-height: 24px;
+  font: var(--swift-answer1L);
+  color: var(--swift-mainText);
+}
+.mv-head-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: var(--swift-blue100);
+}
+.mv-head-sub:active {
+  background: #ffffff99;
+}
+.mv-head-sub:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+}
+.mv-head-note {
+  color: var(--swift-secondaryText);
+}
+/* «Избранное» в той же рамке */
+.ma-fav-page .ma-fav-body {
+  padding-top: 8px;
+}
+.ma-fav-page .ma-group > .ma-caption {
+  background: var(--swift-white);
 }
