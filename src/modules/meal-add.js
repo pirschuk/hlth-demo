@@ -235,7 +235,7 @@ function MealAddScreen() {
     qq = q.trim().toLowerCase(),
     results = qq ? maSearchAll(st, qq) : null,
     view = st.controls.view,
-    variant = st.controls.addVariant ?? "main";
+    variant = st.controls.addVariant ?? "sheet";
   /* скрыть рамку фокуса, когда клавиатуру закрыли кнопкой «Готово» */
   V.useEffect(() => {
     !st.controls.keyboard && document.activeElement?.closest?.(".ma-page") && document.activeElement.blur();

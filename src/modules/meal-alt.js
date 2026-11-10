@@ -298,6 +298,86 @@ function MvBento({ ctx }) {
   });
 }
 
+/* ---------- «Шторка» (1 + 4 в рамке экрана приложения) ----------
+ * Рамка как в «Добавить активность»: native-flow-header (fs: «×» + заголовок),
+ * белая шторка native-catalog-surface на градиенте. Внутри: тип приёма —
+ * SegmentedControl ×4 (смена в одно касание), Search, бенто-входы (фото,
+ * «Избранное · N», «Вручную»), «Недавние» ≤ 5; при вводе — результаты каталога.
+ */
+function MvSheet({ ctx }) {
+  const { type, favs, q, setQ } = ctx;
+  return n.jsxs("div", {
+    className: "native-diary-page mv-sheet-page",
+    children: [
+      n.jsx(fs, { title: "Добавить блюдо", close: !0 }),
+      n.jsxs("div", {
+        className: "native-catalog-surface mv-sheet",
+        children: [
+          n.jsx("div", {
+            className: "mf-seg mv-types",
+            role: "radiogroup",
+            "aria-label": "Приём пищи",
+            children: MF_TYPES.map((t) =>
+              n.jsx("button", { type: "button", role: "radio", "aria-checked": t === type, onClick: () => maSetType(t), children: t }, t),
+            ),
+          }),
+          n.jsx("div", { className: "mv-sheet-search", children: n.jsx(MaSearchField, { value: q, onChange: setQ, placeholder: "Найти блюдо или продукт" }) }),
+          n.jsx("div", {
+            className: "scroll ma-list mv-sheet-list",
+            children: n.jsx(MvBody, {
+              ctx,
+              children: n.jsxs(n.Fragment, {
+                children: [
+                  n.jsxs("div", {
+                    className: "mv-bento",
+                    children: [
+                      n.jsxs("button", {
+                        type: "button",
+                        className: "mv-tile photo",
+                        onClick: () => N.sheet("camera", { target: "meal" }),
+                        children: [
+                          n.jsx("img", { src: MF_PHOTO, alt: "" }),
+                          n.jsx("span", { className: "mv-tile-icon", children: n.jsx(Q, { name: "icon.food.camera", size: 22 }) }),
+                          n.jsx($, { token: "answer0L", children: "Сфотографировать" }),
+                          n.jsx($, { token: "number3M", children: "или загрузить фото" }),
+                        ],
+                      }),
+                      n.jsxs("button", {
+                        type: "button",
+                        className: "mv-tile fav",
+                        onClick: () => N.go("nutrition-favorites"),
+                        children: [
+                          n.jsx("span", { className: "ma-link-icon", children: n.jsx(Q, { name: "heart-fill", size: 20 }) }),
+                          n.jsx($, { token: "answer1L", children: "Избранное" }),
+                          n.jsx($, { token: "number3M", className: "ms-muted", children: favs.length ? mvCount(favs.length) : "пока пусто" }),
+                        ],
+                      }),
+                      n.jsxs("button", {
+                        type: "button",
+                        className: "mv-tile manual",
+                        onClick: () => N.sheet("entry", { kind: "meal" }),
+                        children: [
+                          n.jsx("span", { className: "ma-link-icon", children: n.jsx(Q, { name: "icon.food.add_manual", size: 20 }) }),
+                          n.jsx($, { token: "answer1L", children: "Вручную" }),
+                          n.jsx($, { token: "number3M", className: "ms-muted", children: "КБЖУ сами" }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  n.jsx(MvRecent, { ctx }),
+                ],
+              }),
+            }),
+          }),
+        ],
+      }),
+      ctx.chooser,
+    ],
+  });
+}
+
 function MaVariant({ variant, ctx }) {
-  return variant === "hero" ? n.jsx(MvHero, { ctx }) : variant === "dock" ? n.jsx(MvDock, { ctx }) : n.jsx(MvBento, { ctx });
+  return variant === "sheet"
+    ? n.jsx(MvSheet, { ctx })
+    : variant === "hero" ? n.jsx(MvHero, { ctx }) : variant === "dock" ? n.jsx(MvDock, { ctx }) : n.jsx(MvBento, { ctx });
 }

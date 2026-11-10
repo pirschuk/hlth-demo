@@ -17284,16 +17284,17 @@ function gg() {
                       "Экран добавления",
                       n.jsx("select", {
                         "aria-label": "Экран добавления",
-                        value: c.controls.addVariant ?? "main",
+                        value: c.controls.addVariant ?? "sheet",
                         onChange: (h) =>
                           k((g) => {
                             g.addVariant = h.target.value;
                           }),
                         children: [
-                          ["main", "Основной"],
+                          ["sheet", "Шторка (1 + 4)"],
+                          ["main", "1 · Поиск и камера"],
                           ["hero", "Вариант · Сцена"],
                           ["dock", "Вариант · Нижняя строка"],
-                          ["bento", "Вариант · Бенто"],
+                          ["bento", "4 · Бенто"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
                         ),
