@@ -421,11 +421,11 @@ function MealCard({ data }) {
             s.stacks.stats =
               page >= 0
                 ? s.stacks.stats.slice(0, page + 1)
-                : s.stacks.stats.at(-1) === "detail-meal"
-                  ? s.stacks.stats
+                : mpVariant(s) === "blocks"
+                  ? ["stats", "detail-meal", MP_PREFIX + e.meal]
                   : ["stats", "detail-meal"];
           })(),
-          (s.toast = s.toastPill = "Приём пищи успешно добавлен"),
+          (s.toast = s.toastPill = `Добавлено в ${e.meal.toLowerCase()}: ${e.name}`),
           (s.toastIcon = "toast.check-circle");
       })) || 0;
     },

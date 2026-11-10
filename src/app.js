@@ -13218,7 +13218,7 @@ function ha({ title: c, back: o = !1, right: f }) {
 function La({ children: c }) {
   const o = we();
   /* экран «Добавить блюдо» рисует свои состояния загрузки и ошибки (meal-add.js) */
-  if (N.screen() === "nutrition-add") return c;
+  if (["nutrition-add", "nutrition-search"].includes(N.screen())) return c;
   return o.controls.view === "loading"
     ? n.jsx("div", {
         className: "skeletons",
@@ -15349,6 +15349,7 @@ function rg({ screen: c }) {
     v = c === "activity-search",
     x = c === "nutrition-own" || c === "nutrition-favorites";
   if (c === "nutrition-add") return n.jsx(MealAddScreen, {});
+  if (c === "nutrition-search") return n.jsx(MealSearchScreen, {});
   if (c === "nutrition-add-legacy")
     return n.jsxs(n.Fragment, {
       children: [

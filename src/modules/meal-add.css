@@ -1,4 +1,4 @@
-/* Экран «Добавить блюдо» — компоненты DS (список и ID — в шапке meal-add.js). */
+/* Добавление блюда, итерация 2 — компоненты DS (список и ID — в шапке meal-add.js). */
 
 .ma-page {
   flex: 1;
@@ -20,16 +20,6 @@
 }
 .phone-screen .ma-header h1 {
   margin: 0;
-}
-
-/* Chip ×4 в одну строку */
-.ma-chips {
-  margin: 12px 16px;
-  flex-wrap: nowrap;
-}
-.ma-chips button {
-  flex: 1;
-  padding: 0;
 }
 
 /* Search (19318:278360): белое поле 56, r16, обводка Blue/20 */
@@ -79,116 +69,6 @@
   overflow-y: auto;
   padding: 0 16px 16px;
 }
-.ma-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-/* [-Meal Card] meal image card (22113:138305) */
-.ma-meal-card {
-  min-height: 148px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 16px 12px;
-  border-radius: 24px;
-  background: url(../assets/Gradient_BG3.png) center/cover;
-  box-shadow: inset 0 0 0 1px var(--swift-blue20);
-  text-align: center;
-  color: var(--swift-mainText);
-  transition: transform 0.15s;
-}
-.ma-meal-card.fav {
-  background: var(--swift-white) url(../assets/food.edit.cardbackground.png) center/cover;
-}
-.ma-meal-card:active {
-  transform: scale(0.97);
-}
-.ma-meal-card:focus-visible {
-  outline: 2px solid var(--swift-blue100);
-  outline-offset: 2px;
-}
-.ma-meal-card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 4px;
-  background: var(--swift-white);
-  box-shadow: inset 0 0 0 1px var(--swift-blue20);
-  color: var(--swift-blue100);
-}
-.ma-meal-card-name {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.ma-meal-card-meta {
-  color: var(--swift-secondaryText);
-}
-/* не из DS: подложка текста на иллюстрированном фоне */
-.ma-meal-card.fav .ma-meal-card-name,
-.ma-meal-card.fav .ma-meal-card-meta {
-  padding: 0 6px;
-  border-radius: 8px;
-  background: #ffffffd9;
-}
-/* не из DS: подтверждение касания */
-.ma-meal-card.done {
-  box-shadow: inset 0 0 0 2px var(--swift-blue100);
-}
-.ma-meal-card.done .ma-meal-card-icon {
-  background: var(--swift-blue100);
-  box-shadow: none;
-}
-.ma-check {
-  color: var(--swift-white);
-  font: 600 20px/1 -apple-system, sans-serif;
-}
-
-/* [Inner page sceleton] - card (9859:105512) */
-.ma-card-skeleton {
-  min-height: 148px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 24px;
-  background: var(--swift-white);
-  box-shadow: inset 0 0 0 1px var(--swift-blue20);
-}
-.ma-card-skeleton i,
-.ma-card-skeleton b {
-  display: block;
-  border-radius: 12px;
-  background: linear-gradient(90deg, var(--swift-blue20), var(--swift-blue10));
-  background-size: 200% 100%;
-  animation: ma-shimmer 1.2s linear infinite;
-}
-.ma-card-skeleton i {
-  width: 40px;
-  height: 40px;
-}
-.ma-card-skeleton b {
-  width: 70%;
-  height: 20px;
-}
-.ma-card-skeleton b:last-child {
-  width: 50%;
-  height: 10px;
-}
-@keyframes ma-shimmer {
-  to {
-    background-position: -200% 0;
-  }
-}
-
 /* [-Статистика] Error page (7344:83983) */
 .ma-error {
   display: flex;
@@ -259,12 +139,115 @@
   outline-offset: 2px;
 }
 
+
+
+/* заголовок-переключатель приёма в [Food] Header */
+.ma-title {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 12px;
+  color: var(--swift-mainText);
+}
+.phone-screen .ma-title h1 {
+  margin: 0;
+}
+.ma-title:active {
+  background: var(--swift-blueSelectionBackground);
+}
+
+/* Search как кнопка, открывает экран поиска */
+.ma-search-btn {
+  width: calc(100% - 32px);
+  margin-top: 8px;
+  font: var(--swift-answer1M);
+  color: var(--swift-greyText);
+  text-align: left;
+}
+.ma-search-btn:active {
+  box-shadow: inset 0 0 0 1px var(--swift-blue100);
+}
+.ma-search-results .ma-empty {
+  padding-top: 48px;
+}
+
+/* «Что добавляем?» — Drawer modal + SelectionCard (31967:295707) */
+.ma-chooser h2 {
+  margin: 0 0 8px;
+}
+.ma-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ma-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 0 16px;
+  border-radius: 20px;
+  background: var(--swift-white);
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  color: var(--swift-mainText);
+  text-align: left;
+}
+.ma-choice i {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--swift-greyStroke);
+  flex-shrink: 0;
+}
+.ma-choice[aria-checked="true"] {
+  background: var(--swift-blue10);
+  box-shadow: inset 0 0 0 1px var(--swift-blue100);
+}
+.ma-choice[aria-checked="true"] i {
+  box-shadow: inset 0 0 0 6px var(--swift-blue100);
+}
+.ma-choice:focus-visible {
+  outline: 2px solid var(--swift-blue100);
+  outline-offset: 2px;
+}
+
+/* скелетон [-My food] -list */
+.ma-skeleton > div {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  grid-template-rows: 14px 10px;
+  gap: 8px 12px;
+  padding: 14px 0;
+}
+.ma-skeleton > div + div {
+  box-shadow: inset 0 1px var(--swift-blue20);
+}
+.ma-skeleton i {
+  grid-row: span 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--swift-blue10);
+}
+.ma-skeleton b {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--swift-blue10), var(--swift-blue20), var(--swift-blue10));
+  background-size: 200% 100%;
+  animation: ma-shimmer 1.2s linear infinite;
+}
+.ma-skeleton b:last-child {
+  width: 40%;
+}
 @media (prefers-reduced-motion: reduce) {
-  .ma-meal-card {
-    transition: none;
-  }
-  .ma-card-skeleton i,
-  .ma-card-skeleton b {
+  .ma-skeleton b {
     animation: none;
+  }
+}
+@keyframes ma-shimmer {
+  to {
+    background-position: -200% 0;
   }
 }
