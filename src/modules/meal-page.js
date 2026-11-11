@@ -44,33 +44,14 @@ function mlComposition(items) {
     .map((e) => e.name)
     .join(" · ");
 }
-function MhRow({ entry: e, meal }) {
-  if (e.recognizing || e.recognizeError) return n.jsx(MealRecognitionRow, { entry: e });
-  return n.jsxs("button", {
-    type: "button",
-    className: "mh-row",
-    onClick: () => N.sheet("entry", { kind: "meal", entryId: e.id }),
-    children: [
-      n.jsxs("span", {
-        className: "mh-row-copy",
-        children: [
-          n.jsx($, { token: "assastiveTextL", className: "mh-row-name", children: e.name }),
-          n.jsxs($, {
-            token: "number3M",
-            className: "ms-muted",
-            children: [meal ? `${e.meal || "Перекус"} · ` : "", e.time, " · ", rt(Math.round(e.grams || 100)), " ", e.unit || "г"],
-          }),
-        ],
-      }),
-      n.jsxs($, { token: "number2L", className: "mh-row-kcal", children: [rt(Math.round(e.value)), " ккал"] }),
-    ],
-  });
-}
-/* блок приёма (2026-11-11, после «шумит»): все блоки одного вида — белая
- * карточка r20 с обводкой Blue/20; справа в шапке фиксированный слот 32×32
- * (шеврон у заполненного — поворачивается, «+» у пустого); цвет — только
- * точки БЖУ. Свёрнут: ккал, состав строкой, БЖУ. Раскрыт: блюда строками
- * с разделителями и строка действий «Добавить» / «Скопировать».
+/* блок приёма (2026-11-11, итерация 3):
+ *  - шапка заполненного приёма — на градиенте карточек DS (gradient.card,
+ *    как [-Meal Card] gradient): иконка приёма в белом квадрате, название,
+ *    время и число блюд, крупные ккал, шеврон в фиксированном слоте;
+ *  - БЖУ — у каждого блюда (строка [-meal widget-inner] meal blocks:
+ *    название + время, «ккал · г», точки БЖУ), у приёма — нет;
+ *  - свёрнут: состав строкой; раскрыт: блюда и «Добавить» / «Скопировать»;
+ *  - пустой: та же карточка без градиента, «Нет записей», «+» в том же слоте.
  * Не из DS: раскрывающийся блок, строка состава. */
 function MlBlock({ meal }) {
   const st = we(),
@@ -78,13 +59,14 @@ function MlBlock({ meal }) {
     t = msTotals(items),
     count = items.length,
     open = count > 0 && (st.mealOpen || []).includes(meal),
+    times = items.map((e) => e.time).filter(Boolean).sort(),
     toggle = () =>
       N.update((s) => {
         const o = s.mealOpen || [];
         s.mealOpen = o.includes(meal) ? o.filter((x) => x !== meal) : [...o, meal];
       });
   return n.jsxs("section", {
-    className: `ml-card ${open ? "is-open" : ""}`,
+    className: `ml-card ${count ? "is-filled" : "is-empty"} ${open ? "is-open" : ""}`,
     "aria-label": meal,
     children: [
       n.jsxs("button", {
@@ -96,33 +78,39 @@ function MlBlock({ meal }) {
           : `${meal}: нет записей. Добавить`,
         onClick: count ? toggle : () => mpAddTo(meal),
         children: [
+          n.jsx("span", { className: "ml-icon", children: n.jsx(Q, { name: "icon.food.fork_knife", size: 22 }) }),
           n.jsxs("span", {
             className: "ml-title",
             children: [
-              n.jsxs("span", {
-                className: "ml-line",
-                children: [
-                  n.jsx($, { token: "answer0L", children: meal }),
-                  count > 0 && n.jsxs($, { token: "answer1L", className: "ml-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
-                ],
-              }),
-              !count
-                ? n.jsx($, { token: "assastiveTextM", className: "ml-compo", children: "Нет записей" })
-                : !open && n.jsx($, { token: "assastiveTextM", className: "ml-compo", children: mlComposition(items) }),
-              count > 0 && n.jsx(MsDots, { values: t, className: "ms-dots ml-dots" }),
+              n.jsx($, { token: "answer0L", children: meal }),
+              n.jsx($, { token: "number3M", className: "ms-muted", children: count ? `${times[0]} · ${mlCount(count)}` : "Нет записей" }),
             ],
           }),
+          count > 0 &&
+            n.jsxs("span", {
+              className: "ml-kcal",
+              children: [n.jsx($, { token: "widget2Headline", children: rt(Math.round(t.calories)) }), n.jsx($, { token: "number3M", className: "ms-muted", children: "ккал" })],
+            }),
           n.jsx("span", {
             className: `ml-slot ${count ? "" : "is-add"}`,
             children: n.jsx(Q, { name: count ? "icon.chevron.down" : "entry-plus", size: count ? 14 : 20 }),
           }),
         ],
       }),
+      count > 0 &&
+        !open &&
+        n.jsx("button", {
+          type: "button",
+          className: "ml-compo-row",
+          onClick: toggle,
+          "aria-label": `Показать блюда: ${mlComposition(items)}`,
+          children: n.jsx($, { token: "assastiveTextM", className: "ml-compo", children: mlComposition(items) }),
+        }),
       open &&
         n.jsxs("div", {
           className: "ml-body",
           children: [
-            items.map((e) => n.jsx(MhRow, { entry: e }, e.id)),
+            n.jsx("div", { className: "meal-history-list ml-list", children: items.map((e) => n.jsx(MsMealRow, { entry: e }, e.id)) }),
             n.jsxs("div", {
               className: "ml-actions",
               children: [
