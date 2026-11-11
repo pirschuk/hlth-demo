@@ -30,3 +30,11 @@
 - Bevel — «What are you eating?», Capture / Import photo · `3-add-bevel-capture-import.jpg` · [mobbin](https://mobbin.com/screens/047a259e-6018-41ad-b856-e944c631e14d)
 - Lifesum — Quick track: название, ккал, тип приёма, БЖУ · `3-add-lifesum-quick-track-form.jpg` · [mobbin](https://mobbin.com/screens/f9dc6363-f829-4dc9-8240-f69150f5eba6)
 - BitePal — ручная форма, поля справа с единицами · `3-add-bitepal-manual-form.jpg` · [mobbin](https://mobbin.com/screens/8dee346e-fc88-4833-9de9-09d6c3a97211)
+
+## 5. Флоу питания: блоки приёмов и копирование (2026-11-11)
+- `5-diary-yazio-meal-rows.jpg` — Yazio: строка приёма, ккал + последнее блюдо, «+».
+- `5-diary-lifesum-meal-cards.jpg` — Lifesum: карточка приёма с составом строкой.
+- `5-diary-lifereset-food-log.jpg` — Life Reset: заголовок приёма с ккал, блюда под ним.
+- `5-copy-myfitnesspal-copy-to.jpg` — MyFitnessPal: «Copy to» приём + день.
+- `5-copy-yazio-copy-sheet.jpg` — Yazio: шторка «To which day? / Time of day».
+- `5-pattern-macrofactor-actions-sheet.jpg` — MacroFactor: шторка действий.
