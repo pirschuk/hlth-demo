@@ -38,3 +38,9 @@
 - `5-copy-myfitnesspal-copy-to.jpg` — MyFitnessPal: «Copy to» приём + день.
 - `5-copy-yazio-copy-sheet.jpg` — Yazio: шторка «To which day? / Time of day».
 - `5-pattern-macrofactor-actions-sheet.jpg` — MacroFactor: шторка действий.
+
+## 6. Визуал блоков приёмов (2026-11-11)
+- `6-diary-alma-timeline-cards.jpg` — Alma: карточка приёма с временем, ккал и БЖУ в шапке, «Add food» внутри.
+- `6-diary-yazio-meal-ring-rows.jpg` — Yazio: аватар приёма, ккал и состав второй строкой.
+- `6-pattern-meplus-tinted-cards.jpg` — Me+: карточки с оттенком и иллюстрацией-глифом.
+- `6-pattern-tiimo-day-timeline.jpg` — Tiimo: день как лента, пустые слоты легче заполненных.

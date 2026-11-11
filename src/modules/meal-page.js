@@ -39,9 +39,10 @@ function mlCount(nn) {
 
 /* компактная строка блюда */
 function mlComposition(items) {
-  const names = items.filter((e) => !e.recognizing && !e.recognizeError).map((e) => e.name),
-    s = names.join(", ").toLowerCase();
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  return items
+    .filter((e) => !e.recognizing && !e.recognizeError)
+    .map((e) => e.name)
+    .join(" · ");
 }
 function MhRow({ entry: e, meal }) {
   if (e.recognizing || e.recognizeError) return n.jsx(MealRecognitionRow, { entry: e });
@@ -65,67 +66,121 @@ function MhRow({ entry: e, meal }) {
     ],
   });
 }
-/* блок приёма */
-function MlBlock({ meal, mode }) {
+/* блок приёма — визуал итерации 2026-11-11 (рефы: Yazio, Lifesum, Alma, Me+):
+ * плитка приёма с глифом и оттенком, крупные ккал справа, полоса соотношения
+ * БЖУ (доли калорий, не норма), состав строкой; раскрытие — блюда и действия.
+ * Не из DS: оттенки плиток, глифы приёмов (иконки из набора прототипа), полоса БЖУ. */
+var ML_LOOK = {
+  Завтрак: { glyph: "ic.statistic.sleep.picker.sun.png", tone: "#FFF1D6", ink: "#E89B12" },
+  Обед: { glyph: "icon.food.fork_knife.png", tone: "#E3F5E4", ink: "#3BA55C" },
+  Ужин: { glyph: "ic.statistic.sleep.picker.moon.png", tone: "#ECE8FF", ink: "#7B61FF" },
+  Перекус: { glyph: "ic.statistic.meal.png", tone: "#FFE6EC", ink: "#F0567A" },
+};
+function MlGlyph({ meal, size = 22 }) {
+  const l = ML_LOOK[meal];
+  return n.jsx("span", {
+    className: "ml-tile",
+    style: { background: l.tone },
+    children: n.jsx("span", {
+      "aria-hidden": "true",
+      className: "ml-glyph",
+      style: { width: size, height: size, background: l.ink, maskImage: `url(./assets/${l.glyph})`, WebkitMaskImage: `url(./assets/${l.glyph})` },
+    }),
+  });
+}
+function MlSplit({ t }) {
+  const parts = [
+      ["proteins", t.proteins * 4],
+      ["fats", t.fats * 9],
+      ["carbs", t.carbs * 4],
+    ],
+    sum = parts.reduce((a, [, v]) => a + v, 0) || 1;
+  return n.jsxs("div", {
+    className: "ml-split",
+    children: [
+      n.jsx("div", {
+        className: "ml-split-bar",
+        "aria-hidden": "true",
+        children: parts.map(([k, v]) => n.jsx("i", { style: { flexGrow: v / sum, background: MS_COLORS[k] } }, k)),
+      }),
+      n.jsx("div", {
+        className: "ml-split-legend",
+        children: parts.map(([k], i) =>
+          n.jsxs(
+            "span",
+            {
+              children: [
+                n.jsx("i", { style: { background: MS_COLORS[k] } }),
+                n.jsx($, { token: "number3M", className: "ms-muted", children: ["Белки", "Жиры", "Углеводы"][i] }),
+                n.jsxs($, { token: "number3L", children: [msG(t[k]), " г"] }),
+              ],
+            },
+            k,
+          ),
+        ),
+      }),
+    ],
+  });
+}
+function MlBlock({ meal }) {
   const st = we(),
     items = mpItems(st, meal),
     t = msTotals(items),
     count = items.length,
     open = (st.mealOpen || []).includes(meal),
+    times = items.map((e) => e.time).filter(Boolean).sort(),
+    when = times.length ? (times[0] === times.at(-1) ? times[0] : `${times[0]}–${times.at(-1)}`) : "",
     toggle = () =>
       N.update((s) => {
         const o = s.mealOpen || [];
         s.mealOpen = o.includes(meal) ? o.filter((x) => x !== meal) : [...o, meal];
-      }),
-    repeat = () => N.sheet("meal-repeat", { date: st.date, meal });
-  const summary = n.jsxs("span", {
-    className: "ml-head-copy",
-    children: [
-      n.jsxs("span", {
-        className: "ml-head-line",
-        children: [
-          n.jsx($, { token: "answer0L", children: meal }),
-          count > 0 && n.jsxs($, { token: "number2L", className: "ml-kcal", children: [rt(Math.round(t.calories)), " ккал"] }),
-        ],
-      }),
-      count > 0
-        ? n.jsxs(n.Fragment, {
-            children: [
-              n.jsx($, { token: "assastiveTextM", className: "ml-compo", children: mlComposition(items) }),
-              n.jsx(MsDots, { values: t, className: "ms-dots ml-dots" }),
-            ],
-          })
-        : n.jsx($, { token: "assastiveTextM", className: "ms-muted", children: "Нет записей" }),
-    ],
-  });
+      });
+  if (!count)
+    return n.jsxs("button", {
+      type: "button",
+      className: "ml-empty",
+      "aria-label": `${meal}: пока пусто. Добавить`,
+      onClick: () => mpAddTo(meal),
+      children: [
+        n.jsx(MlGlyph, { meal, size: 20 }),
+        n.jsxs("span", {
+          className: "ml-empty-copy",
+          children: [n.jsx($, { token: "answer1L", children: meal }), n.jsx($, { token: "number3M", className: "ms-muted", children: "Пока пусто" })],
+        }),
+        n.jsx("span", { className: "ml-add", children: n.jsx(Q, { name: "entry-plus", size: 20 }) }),
+      ],
+    });
   return n.jsxs("section", {
-    className: `mh-card ml-${mode} ${open && count ? "is-open" : ""}`,
+    className: `ml-card ${open ? "is-open" : ""}`,
+    style: { "--ml-tone": ML_LOOK[meal].tone },
     "aria-label": meal,
     children: [
-      !count
-        ? n.jsxs("button", {
-            type: "button",
-            className: "ml-head",
-            "aria-label": `${meal}: нет записей. Добавить`,
-            onClick: () => mpAddTo(meal),
-            children: [summary, n.jsx("span", { className: "ml-plus", children: n.jsx(Q, { name: "entry-plus", size: 20 }) })],
-          })
-        : n.jsxs("button", {
-              type: "button",
-              className: "ml-head",
-              "aria-expanded": open,
-              onClick: toggle,
-              "aria-label": `${meal}: ${Math.round(t.calories)} ккал, ${mlCount(count)}. ${open ? "Свернуть" : "Показать блюда"}`,
-              children: [summary, n.jsx("span", { className: "ml-chevron", children: n.jsx(Q, { name: "icon.chevron.down", size: 14 }) })],
-            }),
-      open &&
-        count > 0 &&
-        n.jsxs("div", {
-          className: "mh-list",
-          children: [
-            items.map((e) => n.jsx(MhRow, { entry: e }, e.id)),
-            n.jsxs("div", {
-                className: "ml-foot",
+      n.jsxs("button", {
+        type: "button",
+        className: "ml-top",
+        "aria-expanded": open,
+        "aria-label": `${meal}: ${Math.round(t.calories)} ккал, ${mlCount(count)}. ${open ? "Свернуть" : "Показать блюда"}`,
+        onClick: toggle,
+        children: [
+          n.jsx(MlGlyph, { meal }),
+          n.jsxs("span", {
+            className: "ml-title",
+            children: [n.jsx($, { token: "answer0L", children: meal }), n.jsx($, { token: "number3M", className: "ms-muted", children: `${when} · ${mlCount(count)}` })],
+          }),
+          n.jsxs("span", {
+            className: "ml-kcal",
+            children: [n.jsx($, { token: "widget2Headline", children: rt(Math.round(t.calories)) }), n.jsx($, { token: "number3M", className: "ms-muted", children: "ккал" })],
+          }),
+        ],
+      }),
+      n.jsx(MlSplit, { t }),
+      open
+        ? n.jsxs("div", {
+            className: "ml-body",
+            children: [
+              n.jsx("div", { className: "ml-dishes", children: items.map((e) => n.jsx(MhRow, { entry: e }, e.id)) }),
+              n.jsxs("div", {
+                className: "ml-actions",
                 children: [
                   n.jsxs("button", {
                     type: "button",
@@ -134,13 +189,29 @@ function MlBlock({ meal, mode }) {
                   }),
                   n.jsxs("button", {
                     type: "button",
-                    onClick: repeat,
+                    onClick: () => N.sheet("meal-repeat", { date: st.date, meal }),
                     children: [n.jsx(MrCopyIcon, { size: 18 }), n.jsx($, { token: "assastiveTextL", children: "Скопировать" })],
                   }),
                 ],
               }),
-          ],
-        }),
+              n.jsxs("button", {
+                type: "button",
+                className: "ml-fold",
+                onClick: toggle,
+                children: [n.jsx($, { token: "number3M", children: "Свернуть" }), n.jsx(Q, { name: "icon.chevron.down", size: 12 })],
+              }),
+            ],
+          })
+        : n.jsxs("button", {
+            type: "button",
+            className: "ml-compo-row",
+            onClick: toggle,
+            "aria-label": `Показать блюда: ${mlComposition(items)}`,
+            children: [
+              n.jsx($, { token: "assastiveTextM", className: "ml-compo", children: mlComposition(items) }),
+              n.jsx(Q, { name: "icon.chevron.down", size: 12 }),
+            ],
+          }),
     ],
   });
 }
@@ -148,6 +219,6 @@ function MlBlock({ meal, mode }) {
 function MealListAlt() {
   return n.jsx("div", {
     className: "mp-blocks",
-    children: MF_TYPES.map((meal) => n.jsx(MlBlock, { meal, mode: "accordion" }, meal)),
+    children: MF_TYPES.map((meal) => n.jsx(MlBlock, { meal }, meal)),
   });
 }

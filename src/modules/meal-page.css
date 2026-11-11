@@ -1,72 +1,121 @@
-/* Экран «Приёмы пищи»: варианты без отдельных экранов приёма (meal-page.js) */
+/* Экран «Приёмы пищи» (meal-page.js). Не из DS: оттенки плиток, полоса БЖУ, раскрывающийся блок. */
 .mp-blocks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
-/* общий виджет над блоками — без подписи */
 .phone-screen:has(.mp-blocks) .metric-card.mini.meal .metric-title {
   display: none;
 }
-.mh-card {
-  border-radius: 20px;
-  background: var(--swift-white);
-  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+/* заполненный приём */
+.ml-card {
+  position: relative;
+  border-radius: 24px;
+  background: linear-gradient(180deg, var(--ml-tone) -60%, var(--swift-white) 70%);
+  box-shadow: 0 8px 24px #0029840d, inset 0 0 0 1px #ffffff;
   overflow: hidden;
 }
-.ml-head {
+.ml-top {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 72px;
-  padding: 12px 12px 12px 16px;
+  padding: 16px 16px 12px;
   text-align: left;
   color: var(--swift-mainText);
 }
-.ml-head-copy {
+.ml-tile {
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px #ffffffaa;
+}
+.ml-glyph {
+  display: block;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+}
+.ml-title {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-.ml-head-line {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 2px;
 }
 .ml-kcal {
-  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
 }
-.ml-chevron,
-.ml-plus {
-  flex: 0 0 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  color: var(--swift-blue100);
+/* полоса соотношения БЖУ (доли калорий) */
+.ml-split {
+  padding: 0 16px 12px;
 }
-.ml-plus {
-  background: var(--swift-blue10);
+.ml-split-bar {
+  display: flex;
+  gap: 3px;
+  height: 6px;
 }
-.ml-chevron .icon,
-.ml-chevron svg {
-  transition: transform 0.2s;
+.ml-split-bar i {
+  border-radius: 3px;
+  min-width: 6px;
 }
-.is-open .ml-chevron .icon,
-.is-open .ml-chevron svg {
-  transform: rotate(180deg);
+.ml-split-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
 }
-button.ml-head:active,
-.mh-row:active,
-.ml-foot button:active {
-  background: var(--swift-blueSelectionBackground);
+.ml-split-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
-.mh-list {
+.ml-split-legend i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+/* состав строкой */
+.ml-compo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px 14px;
   box-shadow: inset 0 1px var(--swift-blue20);
+  text-align: left;
+  color: var(--swift-greyChevron);
+}
+.ml-compo {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  color: var(--swift-mainText);
+}
+.ml-compo > [data-swift-lines] {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+/* раскрытый приём */
+.ml-body {
+  padding: 0 8px 8px;
+}
+.ml-dishes {
+  border-radius: 18px;
+  background: var(--swift-white);
+  box-shadow: inset 0 0 0 1px var(--swift-blue20);
+  overflow: hidden;
 }
 .mh-row {
   display: flex;
@@ -74,12 +123,11 @@ button.ml-head:active,
   gap: 12px;
   width: 100%;
   min-height: 60px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   text-align: left;
   color: var(--swift-mainText);
 }
-.mh-row + .mh-row,
-.mh-list > .ml-foot {
+.mh-row + .mh-row {
   box-shadow: inset 0 1px var(--swift-blue20);
 }
 .mh-row-copy {
@@ -97,53 +145,77 @@ button.ml-head:active,
 .mh-row-kcal {
   white-space: nowrap;
 }
-.ml-foot {
+.ml-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
 }
-.ml-foot button {
-  height: 48px;
+.ml-actions button {
+  height: 44px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  background: var(--swift-blue10);
   color: var(--swift-blue100);
 }
-.ml-foot button + button {
-  box-shadow: inset 1px 0 var(--swift-blue20);
-}
-@media (prefers-reduced-motion: reduce) {
-  .ml-chevron .icon,
-  .ml-chevron svg {
-    transition: none;
-  }
-}
-
-/* состав приёма строкой, БЖУ — третьей строкой */
-.ml-compo {
-  color: var(--swift-secondaryText);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.ms-dots.ml-dots {
+.ml-fold {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 36px;
+  margin-top: 2px;
+  color: var(--swift-greyText);
 }
-.ml-head {
-  align-items: flex-start;
+.ml-fold .icon {
+  transform: rotate(180deg);
 }
-.ml-chevron,
-.ml-plus {
-  margin-top: -2px;
+/* пустой приём — компактная строка */
+.ml-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 68px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 24px;
+  background: #ffffffb3;
+  box-shadow: inset 0 0 0 1px #ffffff;
+  text-align: left;
+  color: var(--swift-mainText);
 }
-.ml-compo {
-  display: block;
-  min-width: 0;
+.ml-empty .ml-tile {
+  flex-basis: 40px;
+  height: 40px;
+  border-radius: 12px;
+  opacity: 0.85;
 }
-.ml-compo > [data-swift-lines] {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.ml-empty-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ml-add {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--swift-blue10);
+  color: var(--swift-blue100);
+}
+.ml-top:active,
+.ml-compo-row:active,
+.mh-row:active,
+.ml-empty:active,
+.ml-fold:active {
+  background: #2b6cfc0d;
+}
+.ml-actions button:active {
+  background: var(--swift-blue20);
 }
