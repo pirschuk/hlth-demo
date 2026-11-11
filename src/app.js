@@ -17332,9 +17332,7 @@ function gg() {
                             g.mealList = h.target.value;
                           }),
                         children: [
-                          ["accordion", "A · Раскрывающиеся блоки"],
-                          ["open", "B · Открытые блоки, действия в шапке"],
-                          ["feed", "C · Лента дня без групп"],
+                          ["accordion", "Блоки приёмов (основной)"],
                           ["groups", "Исходные группы"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),

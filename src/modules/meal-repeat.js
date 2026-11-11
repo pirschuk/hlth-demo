@@ -1,6 +1,7 @@
 /* =====================================================================
- * Дублирование приёма пищи (например, повторить вчерашний завтрак).
- *  - Вход: иконка «Повторить» на странице приёма; в варианте «группы» —
+ * Копирование приёма пищи (например, вчерашний завтрак на сегодня).
+ * Название «Скопировать» (было «Повторить» — читалось как повтор внутри).
+ *  - Вход: «Скопировать» в раскрытом блоке приёма; в режиме «группы» —
  *    в шапке группы прошедшего дня.
  *  - Шторка: тип приёма (можно повторить завтрак как обед), дата и время
  *    (по умолчанию — сегодня и текущее время), выбор блюд (по умолчанию
@@ -9,15 +10,18 @@
  *    не меняются.
  * ===================================================================== */
 
-function MrRepeatIcon({ size = 18 }) {
+/* иконка копирования — из набора прототипа (nc.chat.copy.icon) */
+function MrCopyIcon({ size = 18 }) {
   return n.jsx("span", {
     "aria-hidden": "true",
     className: "icon sf-symbol",
     style: {
       width: size,
       height: size,
-      maskImage: "url(./assets/chat.arrows.refresh.png)",
-      WebkitMaskImage: "url(./assets/chat.arrows.refresh.png)",
+      maskImage: "url(./assets/nc.chat.copy.icon.png)",
+      WebkitMaskImage: "url(./assets/nc.chat.copy.icon.png)",
+      maskSize: "contain",
+      WebkitMaskSize: "contain",
     },
   });
 }
@@ -32,9 +36,9 @@ function MealRepeatButton({ date, meal }) {
   return n.jsx("button", {
     type: "button",
     className: "mr-repeat-btn",
-    "aria-label": `Повторить ${meal.toLowerCase()} на сегодня`,
+    "aria-label": `Скопировать ${meal.toLowerCase()}`,
     onClick: () => N.sheet("meal-repeat", { date, meal }),
-    children: n.jsx(MrRepeatIcon, {}),
+    children: n.jsx(MrCopyIcon, {}),
   });
 }
 
@@ -73,7 +77,7 @@ function MealRepeatSheet({ data }) {
           top.startsWith("nutrition-") &&
           ((s.tab = "stats"), (s.stacks.stats = ["stats", "detail-meal"]), (s.mealDraftType = s.mealDraftDate = s.mealDraftTime = null));
         mlReveal(s, type);
-        s.toast = s.toastPill = date === sl ? `${type} добавлен на сегодня` : `${type} добавлен на ${_p(date)}`;
+        s.toast = s.toastPill = date === sl ? `${type} скопирован на сегодня` : `${type} скопирован на ${_p(date)}`;
         s.toastIcon = "toast.check-circle";
       });
     };
@@ -87,9 +91,9 @@ function MealRepeatSheet({ data }) {
         onClick: () => N.back(),
         children: n.jsx(Q, { name: "close", size: 18 }),
       }),
-      n.jsx($, { as: "h2", token: "headline2", children: `Повторить ${data.meal.toLowerCase()}` }),
+      n.jsx($, { as: "h2", token: "headline2", children: `Скопировать ${data.meal.toLowerCase()}` }),
 
-      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Тип приёма" }),
+      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Куда" }),
       n.jsx("div", {
         className: "mf-type-chips",
         role: "radiogroup",
@@ -99,7 +103,7 @@ function MealRepeatSheet({ data }) {
         ),
       }),
 
-      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Время приёма" }),
+      n.jsx($, { as: "h3", token: "answer1L", className: "mr-label", children: "Дата и время" }),
       n.jsxs("div", {
         className: "mf-drums",
         children: [
@@ -114,7 +118,7 @@ function MealRepeatSheet({ data }) {
       n.jsx("div", {
         className: "mr-list",
         role: "group",
-        "aria-label": "Блюда для повтора",
+        "aria-label": "Блюда для копирования",
         children: items.map((e) =>
           n.jsxs(
             "label",
@@ -147,7 +151,7 @@ function MealRepeatSheet({ data }) {
           n.jsx(re, {
             disabled: !chosen.length || busy,
             onClick: () => void submit(),
-            children: chosen.length ? `Добавить в ${type.toLowerCase()}` : "Выберите блюда",
+            children: chosen.length ? `Скопировать в ${type.toLowerCase()} (${chosen.length})` : "Выберите блюда",
           }),
           n.jsx(re, { className: "mr-ghost", onClick: () => N.back(), children: "Отменить" }),
         ],

@@ -125,3 +125,13 @@
 .sheet:has(.mr-sheet) .mr-sheet {
   padding-top: 0;
 }
+/* кнопка копирования всегда видна: итог и кнопки прилипают к низу шторки */
+.mr-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 -24px;
+  padding: 12px 24px 8px;
+  background: var(--swift-white);
+  box-shadow: 0 -1px var(--swift-blue20);
+}

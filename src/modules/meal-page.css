@@ -40,15 +40,6 @@
 .ml-kcal {
   white-space: nowrap;
 }
-.ml-head-sub {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.ml-head-sub .ms-dots {
-  display: flex;
-  gap: 8px;
-}
 .ml-chevron,
 .ml-plus {
   flex: 0 0 32px;
@@ -71,32 +62,11 @@
 }
 button.ml-head:active,
 .mh-row:active,
-.ml-foot button:active,
-.ml-icon:active {
+.ml-foot button:active {
   background: var(--swift-blueSelectionBackground);
-}
-.ml-actions {
-  display: flex;
-  gap: 4px;
-  align-self: flex-start;
-}
-.ml-icon {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--swift-blue10);
-  color: var(--swift-blue100);
-}
-.ml-open .ml-kcal {
-  margin-right: 4px;
 }
 .mh-list {
   box-shadow: inset 0 1px var(--swift-blue20);
-}
-.ml-feed .mh-list {
-  box-shadow: none;
 }
 .mh-row {
   display: flex;
@@ -147,4 +117,33 @@ button.ml-head:active,
   .ml-chevron svg {
     transition: none;
   }
+}
+
+/* состав приёма строкой, БЖУ — третьей строкой */
+.ml-compo {
+  color: var(--swift-secondaryText);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ms-dots.ml-dots {
+  display: flex;
+  gap: 10px;
+}
+.ml-head {
+  align-items: flex-start;
+}
+.ml-chevron,
+.ml-plus {
+  margin-top: -2px;
+}
+.ml-compo {
+  display: block;
+  min-width: 0;
+}
+.ml-compo > [data-swift-lines] {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
