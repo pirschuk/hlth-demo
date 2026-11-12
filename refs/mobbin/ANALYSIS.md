@@ -44,3 +44,9 @@
 - `6-diary-yazio-meal-ring-rows.jpg` — Yazio: аватар приёма, ккал и состав второй строкой.
 - `6-pattern-meplus-tinted-cards.jpg` — Me+: карточки с оттенком и иллюстрацией-глифом.
 - `6-pattern-tiimo-day-timeline.jpg` — Tiimo: день как лента, пустые слоты легче заполненных.
+
+## 7. С нуля: экран «Питание» и добавление (2026-11-12)
+- `7-home-calai-macro-cards.jpg`, `7-home-bevel-add-toolbar.jpg` — итог дня крупно; способы добавления под итогом.
+- `7-pattern-starling-grouped-list.jpg`, `7-pattern-revolut-day-groups.jpg` — группа = заголовок с суммой + карточка строк.
+- `7-scan-calai-modes.jpg`, `7-scan-oura-camera-first.jpg` — режимы камеры; камера первой, остальное в шторке.
+- `7-pattern-x-swipe-delete.jpg` — свайп-удаление.
