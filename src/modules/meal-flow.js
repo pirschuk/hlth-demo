@@ -845,33 +845,10 @@ function mfUsePhoto() {
   mfStartRecognition();
 }
 
-/* Камера: режимы «Блюдо · Этикетка · Штрихкод · Честный знак» (plan.md 2026-11-12).
- * «Блюдо» — фото → распознавание; остальные — имитация сканирования: открывается
- * карточка демо-продукта (данные демо, не из ТЗ). links — строка «Мои блюда ·
- * Найти · Вручную» под камерой (вариант 3 экрана «Питание»). */
-var MF_CAM_MODES = [
-  ["plate", "Блюдо", "Наведите на тарелку целиком"],
-  ["label", "Этикетка", "Наведите на таблицу пищевой ценности"],
-  ["barcode", "Штрихкод", "Наведите на штрихкод упаковки"],
-  ["honest", "Честный знак", "Наведите на квадратный код «Честного знака»"],
-];
-var MF_SCAN_DEMO = {
-  label: { id: "scan-yogurt", name: "Йогурт греческий 2%", calories: 66, proteins: 7, fats: 2, carbs: 4.3, portion: 140 },
-  barcode: { id: "scan-bar", name: "Батончик мюсли с орехами", calories: 412, proteins: 8.5, fats: 14, carbs: 61, portion: 35 },
-  honest: { id: "scan-kefir", name: "Кефир 1%", calories: 40, proteins: 3, fats: 1, carbs: 4, portion: 250 },
-};
-function mfScanned(mode) {
-  N.back();
-  setTimeout(() => N.sheet("product", { product: MF_SCAN_DEMO[mode], from: "search" }), 0);
-}
-function MealCamera({ gallery, links }) {
-  const [shot, setShot] = V.useState(!!gallery),
-    [mode, setMode] = V.useState("plate"),
-    m = MF_CAM_MODES.find((x) => x[0] === mode),
-    scan = mode === "barcode" || mode === "honest",
-    go = (fn) => (N.back(), setTimeout(fn, 0));
+function MealCamera({ gallery }) {
+  const [shot, setShot] = V.useState(!!gallery);
   return n.jsxs("div", {
-    className: `mf-camera mode-${mode}`,
+    className: "mf-camera",
     role: "dialog",
     "aria-label": shot ? "Предпросмотр фото" : "Камера",
     children: [
@@ -891,8 +868,7 @@ function MealCamera({ gallery, links }) {
         className: `mf-viewfinder ${shot ? "shot" : ""}`,
         children: [
           n.jsx("img", { src: MF_PHOTO, alt: "Кадр с едой" }),
-          !shot && n.jsx("i", { className: `mf-frame ${mode}`, "aria-hidden": "true" }),
-          !shot && n.jsx("span", { className: "mf-cam-hint", children: m[2] }),
+          !shot && n.jsx("i", { className: "mf-frame", "aria-hidden": "true" }),
         ],
       }),
       shot
@@ -903,42 +879,21 @@ function MealCamera({ gallery, links }) {
               n.jsx("button", { onClick: mfUsePhoto, children: "Использовать" }),
             ],
           })
-        : n.jsxs(n.Fragment, {
+        : n.jsxs("div", {
+            className: "mf-camera-controls",
             children: [
-              n.jsx("div", {
-                className: "mf-cam-modes",
-                role: "radiogroup",
-                "aria-label": "Что снимаем",
-                children: MF_CAM_MODES.map(([k, l]) =>
-                  n.jsx("button", { type: "button", role: "radio", "aria-checked": k === mode, onClick: () => setMode(k), children: l }, k),
-                ),
+              n.jsx("button", {
+                className: "mf-cam-side round",
+                "aria-label": "Загрузить фото из галереи",
+                onClick: () => setShot(!0),
+                children: n.jsx("img", { src: "assets/icon.food.gallery.svg", width: 22, height: 22, alt: "" }),
               }),
-              n.jsxs("div", {
-                className: "mf-camera-controls",
-                children: [
-                  n.jsx("button", {
-                    className: "mf-cam-side round",
-                    "aria-label": "Загрузить фото из галереи",
-                    onClick: () => (mode === "plate" ? setShot(!0) : mfScanned(mode)),
-                    children: n.jsx("img", { src: "assets/icon.food.gallery.svg", width: 22, height: 22, alt: "" }),
-                  }),
-                  n.jsx("button", {
-                    className: `mf-shutter ${scan ? "scan" : ""}`,
-                    "aria-label": scan ? "Сканировать" : "Сделать фото",
-                    onClick: () => (mode === "plate" ? setShot(!0) : mfScanned(mode)),
-                  }),
-                  n.jsx("button", { className: "mf-cam-side round", "aria-label": "Сменить камеру", children: "↻" }),
-                ],
+              n.jsx("button", {
+                className: "mf-shutter",
+                "aria-label": "Сделать фото",
+                onClick: () => setShot(!0),
               }),
-              links &&
-                n.jsx("div", {
-                  className: "mf-cam-links",
-                  children: [
-                    ["Мои блюда", () => go(() => N.go("nutrition-favorites", "stats"))],
-                    ["Найти", () => go(() => N.go("nutrition-add", "stats"))],
-                    ["Вручную", () => go(() => N.sheet("entry", { kind: "meal" }))],
-                  ].map(([l, fn]) => n.jsx("button", { type: "button", onClick: fn, children: l }, l)),
-                }),
+              n.jsx("button", { className: "mf-cam-side round", "aria-label": "Сменить камеру", children: "↻" }),
             ],
           }),
     ],

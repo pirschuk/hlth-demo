@@ -16109,10 +16109,12 @@ function fg({ screen: c }) {
   if (c.startsWith("nutrition-") || c === "activity-search")
     return n.jsx(rg, { screen: c });
   const x = c.startsWith("detail-"),
-    j = x ? c.replace("detail-", "") : "meal",
+    j = x ? c.replace("detail-", "") : "meal";
+  if (x && j === "meal" && nxOn(o)) return n.jsx(NxApp, {});
+  const
     k = o.controls.view === "empty" ? [] : $f(o, j),
     h = {
-      meal: nvOn(o) ? ["Питание", "Дневник питания"] : ["Приёмы пищи", "Питание"],
+      meal: ["Приёмы пищи", "Питание"],
       activity: ["Тренировки", "Активность"],
       water: ["Приёмы воды", "Гидратация"],
       steps: ["Шаги", "Активность"],
@@ -16183,13 +16185,10 @@ function fg({ screen: c }) {
           onScroll: (w) => d(w.currentTarget.scrollTop),
           children: [
             n.jsx(Vf, {}),
-            !(j === "meal" && nvOn(o)) &&
-              (k.length > 0 || o.goals[j] > 0) &&
+            (k.length > 0 || o.goals[j] > 0) &&
               o.controls.view !== "empty" &&
               n.jsx(_u, { kind: j, compact: !0 }),
-            j === "meal" && nvOn(o)
-              ? n.jsx(NutriBody, {})
-              : k.length
+            k.length
               ? g.map((w) =>
                   j === "meal"
                     ? n.jsx(MealGroup, { name: w.name, items: w.items }, w.name)
@@ -16353,14 +16352,12 @@ function fg({ screen: c }) {
           ],
         }),
       }),
-      j === "meal" && nvOn(o)
-        ? n.jsx(NutriOverlay, {})
-        : n.jsx("button", {
-            className: "native-detail-add",
-            "aria-label": "Добавить запись",
-            onClick: () => nh(j),
-            children: "+",
-          }),
+      n.jsx("button", {
+        className: "native-detail-add",
+        "aria-label": "Добавить запись",
+        onClick: () => nh(j),
+        children: "+",
+      }),
     ],
   });
 }
@@ -17329,15 +17326,15 @@ function gg() {
                       "Экран «Питание»",
                       n.jsx("select", {
                         "aria-label": "Экран «Питание»",
-                        value: c.controls.mealList ?? "v2",
+                        value: c.controls.mealList ?? "a",
                         onChange: (h) =>
                           k((g) => {
                             g.mealList = h.target.value;
                           }),
                         children: [
-                          ["v1", "1 · Выписка"],
-                          ["v2", "2 · Переключатель приёмов"],
-                          ["v3", "3 · Камера в центре"],
+                          ["a", "A · Плитки приёмов"],
+                          ["b", "B · Лента дня"],
+                          ["c", "C · Карусель приёмов"],
                           ["groups", "Исходный экран"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
@@ -19034,7 +19031,7 @@ function xg({ kind: c, data: o }) {
     case "photos":
     case "camera":
       return o.target === "meal"
-        ? n.jsx(MealCamera, { gallery: !!o.gallery, links: !!o.links })
+        ? n.jsx(MealCamera, { gallery: !!o.gallery })
         : n.jsx(Cg, { data: o, camera: c === "camera" });
     case "photo-preview":
       return n.jsxs(n.Fragment, {
