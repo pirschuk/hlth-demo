@@ -675,3 +675,76 @@
 .mf-seg.mf-bar-types button[aria-checked="false"] {
   background: var(--swift-white);
 }
+
+/* режимы камеры (plan.md 2026-11-12) — не из DS */
+.mf-cam-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #000a;
+  color: #fff;
+  font: 500 14px/18px SB, sans-serif;
+}
+.mf-frame.label {
+  inset: 60px 40px;
+}
+.mf-frame.barcode {
+  inset: 34% 28px;
+}
+.mf-frame.honest {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+}
+.mf-cam-modes {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 12px 0;
+}
+.mf-cam-modes button {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  color: #ffffffb3;
+  font: 500 14px/18px SB, sans-serif;
+  white-space: nowrap;
+}
+.mf-cam-modes button[aria-checked="true"] {
+  background: #fff;
+  color: #000;
+}
+.mf-cam-modes + .mf-camera-controls {
+  height: 132px;
+  padding-bottom: 28px;
+}
+.mf-shutter.scan {
+  background: transparent;
+  box-shadow: none;
+  border-color: #ffffffcc;
+  border-style: dashed;
+}
+.mf-cam-links {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 16px 34px;
+  border-top: 1px solid #ffffff1f;
+  background: #111;
+}
+.mf-cam-links button {
+  min-height: 44px;
+  color: #fff;
+  font: 600 15px/20px SB, sans-serif;
+}
+.mf-cam-links ~ .mf-camera-controls,
+.mf-camera:has(.mf-cam-links) .mf-camera-controls {
+  height: 112px;
+  padding-bottom: 8px;
+}

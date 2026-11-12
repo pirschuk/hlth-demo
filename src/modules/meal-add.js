@@ -235,7 +235,7 @@ function MealAddScreen() {
     qq = q.trim().toLowerCase(),
     results = qq ? maSearchAll(st, qq) : null,
     view = st.controls.view,
-    variant = st.controls.addVariant ?? "sheet";
+    variant = nvOn(st) ? "main" : st.controls.addVariant ?? "sheet"; /* экран «Питание» v1–v3 — поиск с камерой у поля */
   /* скрыть рамку фокуса, когда клавиатуру закрыли кнопкой «Готово» */
   V.useEffect(() => {
     !st.controls.keyboard && document.activeElement?.closest?.(".ma-page") && document.activeElement.blur();
