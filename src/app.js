@@ -16106,6 +16106,7 @@ function fg({ screen: c }) {
   const o = we(),
     [f, d] = V.useState(0),
     v = V.useRef(null);
+  if (c === "smart-camera") return n.jsx(SmartCameraScreen, {});
   if (c.startsWith("nutrition-") || c === "activity-search")
     return n.jsx(rg, { screen: c });
   const x = c.startsWith("detail-"),
@@ -16800,6 +16801,15 @@ const Ba = (c, o, f) => ({
       states: ["content", "loading", "error", "empty"],
     })),
     {
+      id: "smart-camera",
+      title: "Умная камера",
+      group: "Питание",
+      tab: "stats",
+      preset: "filled",
+      source: "Prototype/SmartCamera",
+      states: ["content"],
+    },
+    {
       id: "activity-search",
       title: "Поиск активности",
       group: "Активность",
@@ -17336,6 +17346,27 @@ function gg() {
                           ["b", "B · Лента дня"],
                           ["c", "C · Карусель приёмов"],
                           ["groups", "Исходный экран"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
+                      "Умная камера",
+                      n.jsx("select", {
+                        "aria-label": "Умная камера",
+                        value: c.controls.camVariant ?? "auto",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.camVariant = h.target.value;
+                          }),
+                        children: [
+                          ["auto", "1 · Просто наведи"],
+                          ["tabs", "2 · Три режима"],
+                          ["tray", "3 · Как на кассе"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
                         ),

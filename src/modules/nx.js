@@ -12,8 +12,7 @@
  * Создание (общее для всех, начинается только из приёма — «куда» уже известно):
  *   «Что было на обед?» → поиск (библиотека + мои блюда) | камера |
  *   мои блюда / недавние | «Нет в списке — ввести вручную» → порция → в журнал.
- * Камера: Еда (тарелка → список распознанного), Этикетка (→ форма с цифрами),
- *   Штрихкод и Честный знак (→ продукт сразу). Сканирование — имитация, демо-данные.
+ * Камера — модуль cam.js (умная камера, 3 варианта).
  * Копирование приёма: куда (вчера / сегодня / завтра / другой день) + в какой
  *   приём + какие блюда. Удаление блюда: свайп влево или в карточке блюда.
  * ===================================================================== */
@@ -819,177 +818,6 @@ function NxManual({ meal, name = "", per: pre }) {
   });
 }
 
-/* камера: один видоискатель, режим определяет, что ищем и что будет дальше */
-var NX_MODES = [
-  ["plate", "Еда", "Снимите тарелку сверху — найдём все продукты"],
-  ["label", "Этикетка", "Наведите на таблицу «Пищевая ценность»"],
-  ["barcode", "Штрихкод", "Наведите на штрихкод — сработает само"],
-  ["honest", "Честный знак", "Наведите на квадратный код на упаковке"],
-];
-function NxCamera({ meal }) {
-  const st = we(),
-    [mode, setMode] = V.useState("plate"),
-    [phase, setPhase] = V.useState("aim"),
-    [found, setFound] = V.useState(null),
-    md = NX_MODES.find((x) => x[0] === mode),
-    auto = mode === "barcode" || mode === "honest";
-  V.useEffect(() => {
-    if (!auto || phase !== "aim") return;
-    const t = setTimeout(() => setFound(NX_DEMO[mode]), 1400);
-    return () => clearTimeout(t);
-  }, [mode, phase]);
-  const shoot = () => {
-    setPhase("busy");
-    setTimeout(() => {
-      N.update((s) => void (s.nxLayers = (s.nxLayers || []).filter((l) => l.k !== "camera")));
-      mode === "plate" ? nxOpen({ k: "plate", meal }) : nxOpen({ k: "manual", meal, per: NX_DEMO.label.per });
-      setPhase("aim");
-    }, 1100);
-  };
-  return n.jsxs("div", {
-    className: `nx-cam m-${mode}`,
-    role: "dialog",
-    "aria-label": "Камера",
-    children: [
-      n.jsx("div", { className: "nx-view", children: n.jsx("img", { src: mode === "plate" ? "assets/demo-meal.svg" : "assets/demo-breakfast.svg", alt: "" }) }),
-      n.jsxs("div", {
-        className: "nx-cam-top",
-        children: [
-          n.jsx("button", { type: "button", "aria-label": "Закрыть камеру", onClick: nxBack, children: n.jsx(NxI, { n: "close", s: 20 }) }),
-          n.jsx("span", { children: `Добавляем ${NX_IN[meal]}` }),
-          n.jsx("button", { type: "button", "aria-label": "Вспышка", children: n.jsx(NxI, { n: "flash", s: 20 }) }),
-        ],
-      }),
-      n.jsxs("div", {
-        className: "nx-aim",
-        children: [n.jsx("i", { className: "nx-frame" }), n.jsx("p", { children: phase === "busy" ? (mode === "plate" ? "Ищем продукты на фото…" : "Читаем этикетку…") : md[2] })],
-      }),
-      found &&
-        n.jsxs("div", {
-          className: "nx-found",
-          role: "status",
-          children: [
-            n.jsxs("div", {
-              children: [n.jsx("small", { children: found.brand }), n.jsx("b", { children: found.name }), n.jsxs("span", { children: [nxN(found.per.k), " ккал в 100 г"] })],
-            }),
-            n.jsx("button", {
-              type: "button",
-              className: "nx-cta sm",
-              onClick: () => {
-                const p = found;
-                setFound(null);
-                N.update((s) => void (s.nxLayers = (s.nxLayers || []).filter((l) => l.k !== "camera")));
-                nxOpen({ k: "portion", meal, prod: p });
-              },
-              children: "Выбрать",
-            }),
-            n.jsx("button", { type: "button", className: "nx-ic-btn", "aria-label": "Сканировать ещё раз", onClick: () => setFound(null), children: n.jsx(NxI, { n: "close", s: 16 }) }),
-          ],
-        }),
-      n.jsxs("div", {
-        className: "nx-cam-bottom",
-        children: [
-          n.jsx("div", {
-            className: "nx-modes",
-            role: "radiogroup",
-            "aria-label": "Что снимаем",
-            children: NX_MODES.map(([k, l]) =>
-              n.jsx("button", { type: "button", role: "radio", "aria-checked": k === mode, onClick: () => (setFound(null), setMode(k)), children: l }, k),
-            ),
-          }),
-          n.jsxs("div", {
-            className: "nx-shoot",
-            children: [
-              n.jsx("button", { type: "button", className: "nx-gal", "aria-label": "Выбрать фото из галереи", onClick: () => !auto && shoot(), disabled: auto, children: n.jsx(NxI, { n: "image", s: 22 }) }),
-              auto
-                ? n.jsx("span", { className: "nx-scanning", children: "Ищем код…" })
-                : n.jsx("button", { type: "button", className: `nx-shutter ${phase}`, "aria-label": "Снять", onClick: shoot, disabled: phase === "busy" }),
-              n.jsx("span", { className: "nx-gal ghost" }),
-            ],
-          }),
-        ],
-      }),
-    ],
-  });
-}
-/* результат фото тарелки: каждый продукт можно поправить или убрать */
-function NxPlate({ meal }) {
-  const st = we(),
-    [rows, setRows] = V.useState(() => NX_DEMO.plate.map((x, i) => ({ ...x, id: "pl" + i, on: !0 }))),
-    on = rows.filter((r) => r.on),
-    tot = on.reduce((a, r) => a + (r.per.k * r.g) / 100, 0),
-    upd = (id, fn) => setRows((rs) => rs.map((r) => (r.id === id ? fn(r) : r)));
-  return n.jsxs("div", {
-    className: "nx-screen nx-plate",
-    role: "dialog",
-    "aria-label": "Что на фото",
-    children: [
-      n.jsxs("div", {
-        className: "nx-bar",
-        children: [
-          n.jsx("button", { type: "button", className: "nx-ic-btn", "aria-label": "Переснять", onClick: nxBack, children: n.jsx(NxI, { n: "back" }) }),
-          n.jsx("div", { className: "nx-title", children: n.jsx("h1", { children: "Вот что на фото" }) }),
-          n.jsx("span", { className: "nx-ic-btn ghost" }),
-        ],
-      }),
-      n.jsxs("div", {
-        className: "nx-scroll",
-        children: [
-          n.jsx("div", { className: "nx-shot", children: n.jsx("img", { src: "assets/demo-meal.svg", alt: "Ваше фото" }) }),
-          n.jsx("p", { className: "nx-note", children: "Проверьте вес — от него зависят калории. Лишнее снимите галочкой." }),
-          n.jsx("div", {
-            className: "nx-list",
-            children: rows.map((r) =>
-              n.jsxs(
-                "div",
-                {
-                  className: `nx-pl-row ${r.on ? "" : "off"}`,
-                  children: [
-                    n.jsx("button", {
-                      type: "button",
-                      role: "checkbox",
-                      "aria-checked": r.on,
-                      "aria-label": r.name,
-                      className: "nx-check",
-                      onClick: () => upd(r.id, (x) => ({ ...x, on: !x.on })),
-                      children: r.on && n.jsx(NxI, { n: "check", s: 16, w: 3 }),
-                    }),
-                    n.jsxs("span", { className: "nx-dish-l", children: [n.jsx("b", { children: r.name }), n.jsxs("span", { className: "nx-meta", children: [nxN((r.per.k * r.g) / 100), " ккал"] })] }),
-                    n.jsxs("span", {
-                      className: "nx-mini-w",
-                      children: [
-                        n.jsx("button", { type: "button", "aria-label": "Меньше", onClick: () => upd(r.id, (x) => ({ ...x, g: Math.max(10, x.g - 10) })), children: n.jsx(NxI, { n: "minus", s: 16 }) }),
-                        n.jsxs("b", { children: [r.g, " г"] }),
-                        n.jsx("button", { type: "button", "aria-label": "Больше", onClick: () => upd(r.id, (x) => ({ ...x, g: x.g + 10 })), children: n.jsx(NxI, { n: "plus", s: 16 }) }),
-                      ],
-                    }),
-                  ],
-                },
-                r.id,
-              ),
-            ),
-          }),
-        ],
-      }),
-      n.jsx("div", {
-        className: "nx-foot",
-        children: n.jsx("button", {
-          type: "button",
-          className: "nx-cta",
-          disabled: !on.length,
-          onClick: () =>
-            nxAddEntries(
-              on.map((r) => nxEntry({ id: null, name: r.name, per: r.per }, r.g, meal, st.date, st.controls.clock)),
-              meal,
-              `${nxDishes(on.length)} — ${NX_IN[meal]}`,
-            ),
-          children: `Добавить ${nxDishes(on.length)} · ${nxN(tot)} ккал`,
-        }),
-      }),
-    ],
-  });
-}
-
 /* копирование приёма: куда и что */
 function NxCopy({ meal }) {
   const st = we(),
@@ -1134,10 +962,8 @@ function NxLayer({ l }) {
       : l.k === "manual"
         ? n.jsx(NxManual, { meal: l.meal, name: l.name, per: l.per })
         : l.k === "camera"
-          ? n.jsx(NxCamera, { meal: l.meal })
-          : l.k === "plate"
-            ? n.jsx(NxPlate, { meal: l.meal })
-            : l.k === "copy"
+          ? n.jsx("div", { className: "nx-cam-layer", children: n.jsx(SmartCamera, { meal: l.meal, onClose: nxBack }) })
+          : l.k === "copy"
               ? n.jsx(NxCopy, { meal: l.meal })
               : l.k === "dish"
                 ? n.jsx(NxDishCard, { id: l.id })
