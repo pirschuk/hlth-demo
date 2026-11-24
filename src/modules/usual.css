@@ -204,26 +204,17 @@
   color: var(--swift-blue100);
   font: var(--swift-button);
 }
-/* 3 — свои данные */
-.us-note {
+/* 3 — прошлая подборка из кэша */
+.us-cap-row {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 8px;
-  padding: 8px 8px 8px 12px;
-  border-radius: 12px;
-  background: var(--swift-blue10);
-  color: var(--swift-secondaryText);
 }
-.us-note button {
-  flex-shrink: 0;
-  height: 32px;
-  padding: 0 10px;
-  border-radius: 10px;
-  background: var(--swift-white);
-  color: var(--swift-blue100);
-  font: var(--swift-assastiveTextL);
+.us-stale {
+  min-height: 32px;
+  padding: 0 4px;
+  font: var(--swift-number3M);
+  color: var(--swift-greyText);
 }
 /* [Food] Button_Add ×4 */
 .us-ways {

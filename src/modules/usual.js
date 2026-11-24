@@ -7,9 +7,10 @@
  *   loading  — скелетон (в продукте: дольше ~4 с — считаем ошибкой);
  *   hide     — 1 «Тихо убрать»: блока нет, экран работает без него;
  *   retry    — 2 «Ошибка на месте»: карточка-заглушка с «Повторить»;
- *   fallback — 3 «Свои данные»: показываем недавнее из телефона
- *              (кэш журнала), сверху строка «Подсказки не загрузились ·
- *              Обновить»; если и своих данных нет — как 2.
+ *   fallback — 3 «Прошлая подборка»: блок = персональные рекомендации,
+ *              поэтому при ошибке показываем последнюю успешно загруженную
+ *              подборку из кэша (тот же заголовок, пометка «подборка от
+ *              вчера»), обновляем в фоне; если кэша нет (первый вход) — как 2.
  * Компоненты — по макету (DS: [Food] Header, Search, [-My food] -list,
  * [Food] Button_Add ×4, [-Статистика] Error page — уменьшенная).
  * Список «обычно на завтрак» — демо-данные.
@@ -26,16 +27,6 @@ var US_LIST = [
 function usState(s) {
   return s.controls.usualState ?? "ok";
 }
-function usRecent(s) {
-  /* «свои данные» — что человек ел в этот приём раньше (из журнала на телефоне) */
-  const seen = new Set();
-  return s.entries
-    .filter((e) => e.kind === "meal" && (e.meal || "Перекус") === "Завтрак" && !e.recognizing && !e.recognizeError)
-    .filter((e) => !seen.has(e.name) && seen.add(e.name))
-    .slice(0, 5)
-    .map((e) => ({ id: e.id, name: e.name, g: e.grams || 100, per: { k: (e.value / (e.grams || 100)) * 100, p: (e.proteins / (e.grams || 100)) * 100, f: (e.fats / (e.grams || 100)) * 100, c: (e.carbs / (e.grams || 100)) * 100 } }));
-}
-
 function UsRow({ it }) {
   const k = it.g / 100;
   return n.jsxs("button", {
@@ -82,7 +73,6 @@ function UsBlock() {
   const st = we(),
     state = usState(st),
     [phase, setPhase] = V.useState(null),
-    own = usRecent(st),
     retry = () => {
       setPhase("loading");
       setTimeout(() => (setPhase(null), N.update((s) => void (s.controls.usualState = "ok"))), 1200);
@@ -92,19 +82,14 @@ function UsBlock() {
   if (state === "ok") return n.jsxs(n.Fragment, { children: [cap("ОБЫЧНО НА ЗАВТРАК"), n.jsx(UsList, { items: US_LIST })] });
   if (state === "hide")
     return n.jsx($, { as: "p", token: "number3M", className: "us-hint", children: "Начните вводить — найдём в базе. Или выберите способ ниже." });
-  if (state === "fallback" && own.length)
+  if (state === "fallback")
     return n.jsxs(n.Fragment, {
       children: [
-        cap("ВЫ ЕЛИ НА ЗАВТРАК"),
         n.jsxs("div", {
-          className: "us-note",
-          role: "status",
-          children: [
-            n.jsx($, { token: "number3M", children: "Подсказки не загрузились — показываем ваши недавние" }),
-            n.jsx("button", { type: "button", onClick: retry, children: "Обновить" }),
-          ],
+          className: "us-cap-row",
+          children: [cap("ОБЫЧНО НА ЗАВТРАК"), n.jsx("button", { type: "button", className: "us-stale", onClick: retry, children: "подборка от вчера · обновить" })],
         }),
-        n.jsx(UsList, { items: own }),
+        n.jsx(UsList, { items: US_LIST }),
       ],
     });
   return n.jsxs(n.Fragment, {
