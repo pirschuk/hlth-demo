@@ -50,3 +50,10 @@
 - `7-pattern-starling-grouped-list.jpg`, `7-pattern-revolut-day-groups.jpg` — группа = заголовок с суммой + карточка строк.
 - `7-scan-calai-modes.jpg`, `7-scan-oura-camera-first.jpg` — режимы камеры; камера первой, остальное в шторке.
 - `7-pattern-x-swipe-delete.jpg` — свайп-удаление.
+
+## 8. Ошибка блока рекомендаций (2026-11-24)
+- `8-error-facebook-block-inline.jpg` — ошибка внутри одного блока ленты, остальное работает.
+- `8-error-x-section-try-again.jpg` — тихая строка «не грузится · Try again».
+- `8-error-ikea-card-inline.jpg` — ошибка в карточке, рядом рабочее действие.
+- `8-offline-alltrails-bar.jpg`, `8-stale-larq-offline.jpg` — режим офлайн / устаревшие данные помечены.
+- `8-error-chopt-toast-retry.jpg` — плашка «Something went wrong · Retry» поверх контента.
