@@ -16107,6 +16107,7 @@ function fg({ screen: c }) {
     [f, d] = V.useState(0),
     v = V.useRef(null);
   if (c === "smart-camera") return n.jsx(SmartCameraScreen, {});
+  if (c === "usual-add") return n.jsx(UsualScreen, {});
   if (c.startsWith("nutrition-") || c === "activity-search")
     return n.jsx(rg, { screen: c });
   const x = c.startsWith("detail-"),
@@ -16801,6 +16802,15 @@ const Ba = (c, o, f) => ({
       states: ["content", "loading", "error", "empty"],
     })),
     {
+      id: "usual-add",
+      title: "Добавить завтрак (обычно)",
+      group: "Питание",
+      tab: "stats",
+      preset: "filled",
+      source: "Prototype/UsualAdd",
+      states: ["content"],
+    },
+    {
       id: "smart-camera",
       title: "Умная камера",
       group: "Питание",
@@ -17367,6 +17377,29 @@ function gg() {
                           ["auto", "1 · Просто наведи"],
                           ["tabs", "2 · Три режима"],
                           ["tray", "3 · Как на кассе"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
+                      "Блок «Обычно на…»",
+                      n.jsx("select", {
+                        "aria-label": "Блок «Обычно на…»",
+                        value: c.controls.usualState ?? "ok",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.usualState = h.target.value;
+                          }),
+                        children: [
+                          ["ok", "Загрузился"],
+                          ["loading", "Загружается"],
+                          ["hide", "Ошибка · 1 тихо убрать"],
+                          ["retry", "Ошибка · 2 на месте с «Повторить»"],
+                          ["fallback", "Ошибка · 3 свои данные"],
                         ].map(([h, g]) =>
                           n.jsx("option", { value: h, children: g }, h),
                         ),
