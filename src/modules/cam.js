@@ -10,7 +10,8 @@
  *        В «Еде» — мультифото до 3: снял → просмотр (ScPreview) → «Разобрать» или «+».
  *   tray «Как на кассе» — камера сверху, снизу копится список: можно
  *        отсканировать тарелку, кефир и батончик и добавить всё разом.
- * Общее: только живые фото — галереи нет (решение владельца 2026-11-26); вспышка; разбор тарелки на
+ * Общее: галерея — вариант за переключателем «Камера · галерея» (системная шторка выбора, как на iPhone;
+ * «Еда» — до оставшихся мест, «Этикетка» и «Код» — 1 фото); вспышка; разбор тарелки на
  * продукты с весом, чтение этикетки, штрихкод и QR «Честного знака».
  * ПРОТОТИП: настоящей камеры нет — плашка «Перед камерой: …» меняет сцену
  * (тарелка / упаковка со штрихкодом / QR / этикетка). Данные демо.
@@ -143,6 +144,7 @@ function ScFlash({ on, set, cls = "" }) {
 /* неудача кода / этикетки: не тупик — следующий шаг всегда есть */
 var SC_FAIL = {
   codenf: ["Не нашли товар по коду", "Штрихкода 4607 0153 2210 4 нет в нашей базе. Снимите этикетку — посчитаем по ней.", [["label", "Снять этикетку"], ["again", "Сканировать снова"], ["manual", "Ввести вручную"]]],
+  nocode: ["На фото не нашли код", "Выберите фото, где штрихкод или квадратный код «Честного знака» виден целиком.", [["pick", "Выбрать другое фото"], ["camera", "Сканировать камерой"]]],
   labelbad: ["Не получилось прочитать", "Цифры размыты или в тени. Снимите таблицу ровно, при хорошем свете.", [["retake", "Переснять"], ["manual", "Ввести вручную"]]],
 };
 function ScFail({ kind, onAct }) {
@@ -188,7 +190,7 @@ function ScResult({ kind, meal: m0, onBack, onDone, shots }) {
         ],
       }),
       multi && shots.length > 1 &&
-        n.jsx("div", { className: "sc-res-shots", children: shots.map((sh, i) => n.jsxs("span", { children: [n.jsx("img", { src: sh.src, alt: "" }), n.jsx("i", { children: i + 1 })] }, sh.id)) }),
+        n.jsx("div", { className: "sc-res-shots", children: shots.map((sh, i) => n.jsxs("span", { children: [n.jsx(ScPhoto, { src: sh.src }), n.jsx("i", { children: i + 1 })] }, sh.id)) }),
       kind === "label" &&
         n.jsxs("label", {
           className: "sc-name",
@@ -269,6 +271,14 @@ var SC_BY_SRC = {
   ],
   "assets/demo-salad.svg": [["Салат с зеленью и маслом", { k: 70, p: 1, f: 5.5, c: 4.5 }, 150]],
 };
+/* фото из галереи могут быть и упаковками — их рисуем сценой */
+var SC_LIB = ["assets/demo-meal.svg", "scene:barcode", "assets/demo-breakfast.svg", "scene:label", "assets/demo-salad.svg", "scene:qr"];
+SC_BY_SRC["scene:barcode"] = [["Батончик мюсли с орехами", { k: 412, p: 8.5, f: 14, c: 61 }, 35]];
+SC_BY_SRC["scene:qr"] = [["Кефир 1%", { k: 40, p: 3, f: 1, c: 4 }, 250]];
+SC_BY_SRC["scene:label"] = [["Йогурт (по этикетке)", { k: 66, p: 7, f: 2, c: 4.3 }, 140]];
+function ScPhoto({ src, alt = "" }) {
+  return src.startsWith("scene:") ? n.jsx("span", { className: "sc-photo-scene", "aria-label": alt, children: n.jsx(ScScene, { scene: src.slice(6) }) }) : n.jsx("img", { src, alt });
+}
 function scItemsFromShots(shots) {
   return shots.flatMap((sh, i) =>
     (SC_BY_SRC[sh.src] || []).map(([name, per, g], j) => ({ key: `s${i}-${j}-${N.id()}`, name, per, g, src: "Фото", photo: i + 1 })),
@@ -300,6 +310,14 @@ function useScShots() {
       /* главный путь: снял — сразу просмотр с «Разобрать»; ещё фото — по желанию */
       setShots((xs) => {
         const next = [...xs, { id: N.id(), src: scNextSrc(xs) }].slice(0, SC_MAX);
+        setSel(next.length - 1);
+        return next;
+      });
+      setView("preview");
+    },
+    addPhotos(srcs) {
+      setShots((xs) => {
+        const next = [...xs, ...srcs.map((src) => ({ id: N.id(), src }))].slice(0, SC_MAX);
         setSel(next.length - 1);
         return next;
       });
@@ -339,7 +357,7 @@ function ScPreview({ m, onAnalyze, onExit }) {
       n.jsxs("div", {
         className: "sc-prev-img",
         children: [
-          n.jsx("img", { src: cur.src, alt: `Фото ${m.sel + 1}` }, cur.id),
+          n.jsx(ScPhoto, { src: cur.src, alt: `Фото ${m.sel + 1}` }, cur.id),
           n.jsxs("div", {
             className: "sc-prev-top",
             children: [
@@ -361,7 +379,7 @@ function ScPreview({ m, onAnalyze, onExit }) {
               m.shots.map((sh, i) =>
                 n.jsx(
                   "button",
-                  { type: "button", role: "tab", "aria-selected": i === m.sel, "aria-label": `Фото ${i + 1}`, className: "sc-thumb", onClick: () => m.setSel(i), children: n.jsx("img", { src: sh.src, alt: "" }) },
+                  { type: "button", role: "tab", "aria-selected": i === m.sel, "aria-label": `Фото ${i + 1}`, className: "sc-thumb", onClick: () => m.setSel(i), children: n.jsx(ScPhoto, { src: sh.src }) },
                   sh.id,
                 ),
               ),
@@ -376,7 +394,7 @@ function ScPreview({ m, onAnalyze, onExit }) {
   });
 }
 /* просмотр этикетки: одно фото, без «камера +»; главное — «Прочитать» */
-function ScLabelPreview({ onRetake, onRead, onExit }) {
+function ScLabelPreview({ src = "scene:label", onRetake, onRead, onExit }) {
   return n.jsxs("div", {
     className: "sc-prev",
     role: "dialog",
@@ -385,7 +403,7 @@ function ScLabelPreview({ onRetake, onRead, onExit }) {
       n.jsxs("div", {
         className: "sc-prev-img is-label",
         children: [
-          n.jsx(ScScene, { scene: "label" }),
+          n.jsx(ScPhoto, { src }),
           n.jsx("div", {
             className: "sc-prev-top",
             children: n.jsx("button", { type: "button", className: "sc-glass", "aria-label": "Закрыть", onClick: onExit, children: n.jsx(ScI, { n: "close", s: 20 }) }),
@@ -395,6 +413,58 @@ function ScLabelPreview({ onRetake, onRead, onExit }) {
       }),
       n.jsx("div", { className: "sc-prev-bar", children: n.jsx("button", { type: "button", className: "sc-go", onClick: onRead, children: "Прочитать" }) }),
     ],
+  });
+}
+/* системная шторка выбора фото (как PHPicker на iPhone) */
+function ScPicker({ max, onAdd, onClose }) {
+  const [sel, setSel] = V.useState([]),
+    [tab, setTab] = V.useState("photos"),
+    toggle = (src) => (max === 1 ? onAdd([src]) : setSel((xs) => (xs.includes(src) ? xs.filter((x) => x !== src) : xs.length < max ? [...xs, src] : xs)));
+  return n.jsx("div", {
+    className: "sc-sys-wrap",
+    onClick: (v) => v.target === v.currentTarget && onClose(),
+    children: n.jsxs("div", {
+      className: "sc-sys",
+      role: "dialog",
+      "aria-label": "Выбор фото",
+      children: [
+        n.jsx("i", { className: "sc-sys-grip" }),
+        n.jsxs("div", {
+          className: "sc-sys-bar",
+          children: [
+            n.jsx("button", { type: "button", onClick: onClose, children: "Отменить" }),
+            n.jsx("div", {
+              className: "sc-sys-seg",
+              role: "tablist",
+              children: [
+                ["photos", "Фото"],
+                ["albums", "Альбомы"],
+              ].map(([k, l]) => n.jsx("button", { type: "button", role: "tab", "aria-selected": tab === k, onClick: () => setTab(k), children: l }, k)),
+            }),
+            max > 1 ? n.jsx("button", { type: "button", className: "sc-sys-add", disabled: !sel.length, onClick: () => onAdd(sel), children: "Добавить" }) : n.jsx("span", { className: "sc-sys-sp" }),
+          ],
+        }),
+        n.jsx("p", { className: "sc-sys-hint", children: max > 1 ? `Можно выбрать до ${max} фото` : "Выберите одно фото" }),
+        n.jsx("div", {
+          className: "sc-sys-grid",
+          children: [...SC_LIB, ...SC_LIB].map((src, i) => {
+            const k = sel.indexOf(src),
+              on = k >= 0 && i < SC_LIB.length;
+            return n.jsxs(
+              "button",
+              {
+                type: "button",
+                "aria-pressed": on,
+                "aria-label": src.startsWith("scene:") ? "Фото упаковки" : "Фото еды",
+                onClick: () => toggle(src),
+                children: [n.jsx(ScPhoto, { src }), max > 1 && n.jsx("i", { className: `sc-sys-check ${on ? "on" : ""}`, children: on ? k + 1 : "" })],
+              },
+              i,
+            );
+          }),
+        }),
+      ],
+    }),
   });
 }
 function ScLeave({ n: k, onStay, onLeave }) {
@@ -532,14 +602,25 @@ function ScTabs({ meal, onClose, onDone }) {
     setMode = (k) => (setModeRaw(k), c.setScene(k === "code" ? (codeCase === "qr" ? "qr" : "barcode") : k), setLabelShot(!1)),
     /* этикетка: одно фото → просмотр «Переснять / Прочитать» (без «камера +») */
     [labelShot, setLabelShot] = V.useState(!1),
+    galleryOn = (st.controls.camGallery ?? "on") === "on",
+    [picker, setPicker] = V.useState(!1),
+    /* из галереи — тот же путь, что после снимка */
+    fromGallery = (srcs) => {
+      setPicker(!1);
+      if (mode === "plate") return m.addPhotos(srcs);
+      if (mode === "label") return setLabelShot(srcs[0]);
+      const src = srcs[0];
+      c.setScene(src.startsWith("scene:") ? src.slice(6) : "plate");
+      c.setResult(src === "scene:barcode" ? (codeCase === "notfound" ? "codenf" : "barcode") : src === "scene:qr" ? "qr" : "nocode");
+    },
     act = (k) =>
-      k === "label" ? (c.setResult(null), setMode("label")) : k === "again" ? (c.setResult(null), setMode("code")) : k === "retake" ? (c.setResult(null), setLabelShot(!1)) : scManual(meal, onClose);
+      k === "label" ? (c.setResult(null), setMode("label")) : k === "again" ? (c.setResult(null), setMode("code")) : k === "retake" ? (c.setResult(null), setLabelShot(!1)) : k === "pick" ? (c.setResult(null), setPicker(!0)) : k === "camera" ? c.setResult(null) : scManual(meal, onClose);
   /* код: находится сам, без снимка и без просмотра → сразу продукт (или «не нашли») */
   V.useEffect(() => {
-    if (mode !== "code" || c.result || c.busy) return;
+    if (mode !== "code" || c.result || c.busy || picker) return;
     const t = setTimeout(() => c.setResult(codeCase === "notfound" ? "codenf" : codeCase === "qr" ? "qr" : "barcode"), 1100);
     return () => clearTimeout(t);
-  }, [mode, c.result, c.busy, codeCase]);
+  }, [mode, c.result, c.busy, codeCase, picker]);
   return n.jsxs("div", {
     className: `sc sc-tabs m-${mode} ${c.flash ? "flash" : ""}`,
     role: "dialog",
@@ -578,7 +659,16 @@ function ScTabs({ meal, onClose, onDone }) {
                 n.jsxs("div", {
                   className: "sc-row",
                   children: [
-                    n.jsx("span", { className: "sc-glass ghost" }),
+                    galleryOn
+                      ? n.jsx("button", {
+                          type: "button",
+                          className: "sc-galbtn",
+                          "aria-label": "Выбрать из галереи",
+                          disabled: mode === "plate" && m.left <= 0,
+                          onClick: () => setPicker(!0),
+                          children: n.jsx("img", { src: "assets/demo-salad.svg", alt: "" }),
+                        })
+                      : n.jsx("span", { className: "sc-glass ghost" }),
                     mode === "code"
                       ? n.jsx("span", { className: "sc-shutter is-scan", role: "status", "aria-label": "Ищем код", children: n.jsx("i", {}) })
                       : n.jsx("button", { type: "button", className: "sc-shutter", "aria-label": "Снять", disabled: !!c.busy, onClick: () => (mode === "plate" ? m.shoot() : setLabelShot(!0)) }),
@@ -593,7 +683,7 @@ function ScTabs({ meal, onClose, onDone }) {
       labelShot &&
         !c.busy &&
         !c.result &&
-        n.jsx(ScLabelPreview, { onRetake: () => setLabelShot(!1), onRead: () => scAnalyze(c, labelCase === "bad" ? "labelbad" : "label"), onExit: onClose }),
+        n.jsx(ScLabelPreview, { src: typeof labelShot === "string" ? labelShot : "scene:label", onRetake: () => setLabelShot(!1), onRead: () => scAnalyze(c, labelCase === "bad" || (typeof labelShot === "string" && labelShot !== "scene:label") ? "labelbad" : "label"), onExit: onClose }),
       c.result && SC_FAIL[c.result] && n.jsx(ScFail, { kind: c.result, onAct: act }),
       c.result &&
         !SC_FAIL[c.result] &&
@@ -604,6 +694,7 @@ function ScTabs({ meal, onClose, onDone }) {
           onBack: () => (c.setResult(null), c.result === "plate" && m.shots.length ? m.setView("preview") : c.result === "label" ? setLabelShot(!0) : 0),
           onDone,
         }),
+      picker && n.jsx(ScPicker, { max: mode === "plate" ? Math.max(1, m.left) : 1, onAdd: fromGallery, onClose: () => setPicker(!1) }),
       m.confirm && n.jsx(ScLeave, { n: m.shots.length, onStay: () => m.setConfirm(!1), onLeave: () => (m.reset(), onClose()) }),
     ],
   });

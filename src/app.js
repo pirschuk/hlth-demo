@@ -17427,6 +17427,26 @@ function gg() {
                   n.jsxs("label", {
                     className: "panel-label",
                     children: [
+                      "Камера · галерея",
+                      n.jsx("select", {
+                        "aria-label": "Камера · галерея",
+                        value: c.controls.camGallery ?? "on",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.camGallery = h.target.value;
+                          }),
+                        children: [
+                          ["on", "Есть (системная шторка)"],
+                          ["off", "Нет — только живые фото"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
                       "Блок «Обычно на…»",
                       n.jsx("select", {
                         "aria-label": "Блок «Обычно на…»",
