@@ -7,7 +7,7 @@
  *        сама понимает, еда это или этикетка.
  *   tabs «Три режима» — Еда / Код / Этикетка; у каждого своя рамка и свой
  *        способ (код — без кнопки); если в кадре не то — подсказка сменить.
- *        В «Еде» — мультифото до 3 (ScShotControls / ScPreview).
+ *        В «Еде» — мультифото до 3: снял → просмотр (ScPreview) → «Разобрать» или «+».
  *   tray «Как на кассе» — камера сверху, снизу копится список: можно
  *        отсканировать тарелку, кефир и батончик и добавить всё разом.
  * Общее: галерея (шторка с фото), вспышка (вкл/выкл), разбор тарелки на
@@ -310,11 +310,13 @@ function useScShots() {
         setReplace(null), setSel(i), setView("preview");
         return;
       }
+      /* главный путь: снял — сразу просмотр с «Разобрать»; ещё фото — по желанию */
       setShots((xs) => {
-        const next = [...xs, { id: N.id(), src: scNextSrc(xs) }];
-        next.length >= SC_MAX && (setSel(next.length - 1), setView("preview"));
+        const next = [...xs, { id: N.id(), src: scNextSrc(xs) }].slice(0, SC_MAX);
+        setSel(next.length - 1);
         return next;
       });
+      setView("preview");
     },
     addFromGallery(srcs) {
       setShots((xs) => {
@@ -322,7 +324,7 @@ function useScShots() {
         setSel(next.length - 1);
         return next;
       });
-      setPick(null) /* из камеры — остаёмся в камере, фото видно в полоске */;
+      setPick(null), setView("preview");
     },
     replaceFromGallery(i, src) {
       setShots((xs) => xs.map((x, k) => (k === i ? { id: N.id(), src } : x)));
@@ -330,6 +332,9 @@ function useScShots() {
     },
     retake(i) {
       setReplace(i), setView(null);
+    },
+    retakeCancel() {
+      setReplace(null);
     },
     remove(i) {
       setShots((xs) => {
@@ -344,104 +349,54 @@ function useScShots() {
   };
   return api;
 }
-/* камера: галерея всегда слева; снятые — полоской из 3 мест над затвором
- * (пустые бледные — видно лимит); «Далее · N» справа от затвора → просмотр. */
-function ScShotControls({ m, onShutter, onGallery, disabled }) {
-  const has = m.shots.length > 0,
-    full = m.left <= 0 && m.replace === null,
-    open = (i) => (m.setSel(i), m.setView("preview"));
-  return n.jsxs(n.Fragment, {
-    children: [
-      (has || m.replace !== null) &&
-        n.jsxs("div", {
-          className: "sc-strip",
-          children: [
-            [...Array(SC_MAX)].map((_, i) => {
-              const sh = m.shots[i];
-              return sh
-                ? n.jsxs("button", { type: "button", className: `sc-mini ${m.replace === i ? "is-redo" : ""}`, "aria-label": `Фото ${i + 1}. Посмотреть`, onClick: () => open(i), children: [n.jsx("img", { src: sh.src, alt: "" }), n.jsx("i", { children: i + 1 })] }, sh.id)
-                : n.jsx("span", { className: "sc-mini is-free", "aria-hidden": "true", children: i + 1 }, "f" + i);
-            }),
-            n.jsx("span", {
-              className: "sc-strip-t",
-              children: m.replace !== null ? `Переснимаем фото ${m.replace + 1}` : full ? "Это максимум" : `ещё ${m.left === 1 ? "1 фото" : "2 фото"}`,
-            }),
-          ],
-        }),
-      n.jsxs("div", {
-        className: "sc-shoot",
-        children: [
-          n.jsx("button", {
-            type: "button",
-            className: "sc-round big",
-            "aria-label": "Открыть галерею",
-            disabled: full,
-            onClick: onGallery,
-            children: n.jsx(ScI, { n: "gallery", s: 24 }),
-          }),
-          n.jsx("button", { type: "button", className: "sc-shutter", "aria-label": "Снять", disabled: disabled || full, onClick: onShutter }),
-          has && m.replace === null
-            ? n.jsxs("button", {
-                type: "button",
-                className: "sc-next",
-                "aria-label": `Далее — проверить ${m.shots.length} фото`,
-                onClick: () => open(m.shots.length - 1),
-                children: ["Далее", n.jsx("b", { children: m.shots.length })],
-              })
-            : n.jsx("span", { className: "sc-round big ghost" }),
-        ],
-      }),
-    ],
-  });
-}
-/* просмотр: большое фото, «‹ в камеру», корзина; под фото — «Переснять» и
- * «Заменить из галереи»; ниже миниатюры с «+ Ещё»; «Разобрать N фото». */
-function ScPreview({ m, onAnalyze }) {
+/* просмотр — сразу после снимка. Главное — «Разобрать». Ещё фото — плитка «+»
+ * рядом с миниатюрой (возможность, не обязанность). На фото — «Переснять»,
+ * сверху — «×» (выйти) и корзина (убрать это фото). Заменить из галереи =
+ * корзина + «+» (в камере галерея всегда слева) — отдельная кнопка не нужна. */
+function ScPreview({ m, onAnalyze, onExit }) {
   const cur = m.shots[m.sel] || m.shots[0];
   if (!cur) return null;
   return n.jsxs("div", {
     className: "sc-prev",
     role: "dialog",
-    "aria-label": "Проверьте фото",
+    "aria-label": "Фото",
     children: [
-      n.jsxs("div", {
-        className: "sc-prev-top",
-        children: [
-          n.jsxs("button", { type: "button", className: "sc-pill", onClick: () => m.setView(null), children: [n.jsx(ScI, { n: "back", s: 18 }), "Камера"] }),
-          n.jsx("b", { children: `Фото ${m.sel + 1} из ${m.shots.length}` }),
-          n.jsx("button", { type: "button", className: "sc-round", "aria-label": `Удалить фото ${m.sel + 1}`, onClick: () => m.remove(m.sel), children: n.jsx(ScI, { n: "trash", s: 20 }) }),
-        ],
-      }),
       n.jsxs("div", {
         className: "sc-prev-img",
         children: [
           n.jsx("img", { src: cur.src, alt: `Фото ${m.sel + 1}` }, cur.id),
           n.jsxs("div", {
-            className: "sc-prev-acts",
+            className: "sc-prev-top",
             children: [
-              n.jsxs("button", { type: "button", onClick: () => m.retake(m.sel), children: [n.jsx(ScI, { n: "retake", s: 18 }), "Переснять"] }),
-              n.jsxs("button", { type: "button", onClick: () => m.setPick({ mode: "replace", i: m.sel }), children: [n.jsx(ScI, { n: "gallery", s: 18 }), "Заменить из галереи"] }),
+              n.jsx("button", { type: "button", className: "sc-glass", "aria-label": "Закрыть", onClick: onExit, children: n.jsx(ScI, { n: "close", s: 20 }) }),
+              n.jsx("button", { type: "button", className: "sc-glass", "aria-label": `Убрать фото ${m.sel + 1}`, onClick: () => m.remove(m.sel), children: n.jsx(ScI, { n: "trash", s: 20 }) }),
             ],
           }),
+          n.jsxs("button", { type: "button", className: "sc-glass wide", onClick: () => m.retake(m.sel), children: [n.jsx(ScI, { n: "retake", s: 18 }), "Переснять"] }),
         ],
       }),
       n.jsxs("div", {
-        className: "sc-thumbs",
-        role: "tablist",
-        "aria-label": "Фото",
+        className: "sc-prev-bar",
         children: [
-          m.shots.map((sh, i) =>
-            n.jsxs(
-              "button",
-              { type: "button", role: "tab", "aria-selected": i === m.sel, "aria-label": `Фото ${i + 1}`, className: "sc-thumb", onClick: () => m.setSel(i), children: [n.jsx("img", { src: sh.src, alt: "" }), n.jsx("i", { children: i + 1 })] },
-              sh.id,
-            ),
-          ),
-          m.left > 0 &&
-            n.jsxs("button", { type: "button", className: "sc-thumb is-add", "aria-label": "Добавить ещё фото — в камеру", onClick: () => m.setView(null), children: [n.jsx(ScI, { n: "plus", s: 22 }), n.jsx("small", { children: "Ещё" })] }),
+          n.jsxs("div", {
+            className: "sc-thumbs",
+            role: "tablist",
+            "aria-label": "Фото",
+            children: [
+              m.shots.map((sh, i) =>
+                n.jsx(
+                  "button",
+                  { type: "button", role: "tab", "aria-selected": i === m.sel, "aria-label": `Фото ${i + 1}`, className: "sc-thumb", onClick: () => m.setSel(i), children: n.jsx("img", { src: sh.src, alt: "" }) },
+                  sh.id,
+                ),
+              ),
+              m.left > 0 &&
+                n.jsx("button", { type: "button", className: "sc-thumb is-add", "aria-label": `Добавить ещё фото, можно ещё ${m.left}`, onClick: () => m.setView(null), children: n.jsx(ScI, { n: "plus", s: 22 }) }),
+            ],
+          }),
+          n.jsx("button", { type: "button", className: "sc-go", onClick: onAnalyze, children: m.shots.length === 1 ? "Разобрать" : `Разобрать ${m.shots.length} фото` }),
         ],
       }),
-      n.jsx("button", { type: "button", className: "sc-cta", onClick: onAnalyze, children: `Разобрать ${m.shots.length === 1 ? "фото" : `${m.shots.length} фото`}` }),
     ],
   });
 }
@@ -504,7 +459,7 @@ function ScMultiLayers({ m, c }) {
   return n.jsxs(n.Fragment, {
     children: [
       m.blink && n.jsx("i", { className: "sc-blink" }),
-      m.view === "preview" && !c.busy && !c.result && n.jsx(ScPreview, { m, onAnalyze: () => scAnalyze(c, "plate") }),
+      m.view === "preview" && !c.busy && !c.result && n.jsx(ScPreview, { m, onAnalyze: () => scAnalyze(c, "plate"), onExit: () => m.setConfirm(!0) }),
       m.pick &&
         n.jsx(ScGalleryMulti, {
           max: m.pick.mode === "add" ? m.left : 1,
@@ -634,8 +589,7 @@ function ScTabs({ meal, onClose, onDone }) {
       return () => clearTimeout(t);
     }
   }, [mode, c.scene, c.result, c.busy]);
-  const suggest = code ? "code" : c.scene,
-    tab = SC_TABS.find((t) => t[0] === mode);
+  const suggest = code ? "code" : c.scene;
   return n.jsxs("div", {
     className: `sc sc-tabs m-${mode} ${c.flash ? "flash" : ""}`,
     role: "dialog",
@@ -650,16 +604,18 @@ function ScTabs({ meal, onClose, onDone }) {
       !c.result &&
         n.jsxs(n.Fragment, {
           children: [
+            /* верх: только выход. Есть снятые фото — «‹» назад к ним, а не «×» */
             n.jsxs("div", {
               className: "sc-top",
               children: [
-                n.jsx("button", { type: "button", className: "sc-round", "aria-label": "Закрыть", onClick: close, children: n.jsx(ScI, { n: "close", s: 20 }) }),
-                n.jsx("span", { className: "sc-where", children: `Добавляем ${NX_IN[scMeal(N.state, meal)]}` }),
-                n.jsx(ScFlash, { on: c.flash, set: c.setFlash }),
+                m.shots.length
+                  ? n.jsx("button", { type: "button", className: "sc-glass", "aria-label": "Назад к снятым фото", onClick: () => (m.setView("preview"), m.retakeCancel && m.retakeCancel()), children: n.jsx(ScI, { n: "back", s: 20 }) })
+                  : n.jsx("button", { type: "button", className: "sc-glass", "aria-label": "Закрыть", onClick: close, children: n.jsx(ScI, { n: "close", s: 20 }) }),
+                n.jsx(ScDemoPill, { scene: c.scene, setScene: c.setScene }),
+                n.jsx("span", { className: "sc-glass ghost" }),
               ],
             }),
-            n.jsx("div", { className: "sc-demo-top", children: n.jsx(ScDemoPill, { scene: c.scene, setScene: c.setScene }) }),
-            !c.busy && n.jsxs("div", { className: "sc-aim", children: [n.jsx("i", { className: "sc-frame" }), n.jsx("p", { children: mode === "code" && code ? "Нашли код…" : tab[3] })] }),
+            !c.busy && n.jsx("div", { className: "sc-aim", children: n.jsx("i", { className: "sc-frame" }) }),
             miss &&
               !c.busy &&
               n.jsxs("button", {
@@ -668,28 +624,31 @@ function ScTabs({ meal, onClose, onDone }) {
                 onClick: () => setMode(suggest),
                 children: [n.jsx(ScI, { n: "spark", s: 16 }), `Похоже, это ${suggest === "code" ? "код" : suggest === "label" ? "этикетка" : "еда"} — переключить?`],
               }),
+            /* меню: режимы — строкой текста над затвором; галерея слева, вспышка справа */
             n.jsxs("div", {
-              className: "sc-bottom",
+              className: "sc-dock",
               children: [
-                mode === "plate"
-                  ? n.jsx(ScShotControls, { m, disabled: !!c.busy, onShutter: () => m.shoot(), onGallery: () => m.setPick({ mode: "add" }) })
-                  : n.jsxs("div", {
-                      className: "sc-shoot",
-                      children: [
-                        n.jsx("button", { type: "button", className: "sc-round big", "aria-label": "Открыть галерею", onClick: () => c.setGallery(!0), children: n.jsx(ScI, { n: "gallery", s: 24 }) }),
-                        mode === "code"
-                          ? n.jsxs("span", { className: "sc-auto-ring", children: [n.jsx("i", {}), "Ищем"] })
-                          : n.jsx("button", { type: "button", className: "sc-shutter", "aria-label": "Снять", disabled: !!c.busy, onClick: () => scAnalyze(c, mode) }),
-                        n.jsx("span", { className: "sc-round big ghost" }),
-                      ],
-                    }),
                 n.jsx("div", {
-                  className: "sc-modes",
+                  className: "sc-modes2",
                   role: "tablist",
                   "aria-label": "Что снимаем",
-                  children: SC_TABS.map(([k, l, ic]) =>
-                    n.jsxs("button", { type: "button", role: "tab", "aria-selected": k === mode, onClick: () => setMode(k), children: [n.jsx(ScI, { n: ic, s: 22 }), l] }, k),
-                  ),
+                  children: SC_TABS.map(([k, l]) => n.jsx("button", { type: "button", role: "tab", "aria-selected": k === mode, onClick: () => setMode(k), children: l }, k)),
+                }),
+                n.jsxs("div", {
+                  className: "sc-row",
+                  children: [
+                    n.jsx("button", {
+                      type: "button",
+                      className: "sc-galbtn",
+                      "aria-label": "Открыть галерею",
+                      onClick: () => (mode === "plate" ? m.setPick({ mode: "add" }) : c.setGallery(!0)),
+                      children: n.jsx("img", { src: "assets/demo-salad.svg", alt: "" }),
+                    }),
+                    mode === "code"
+                      ? n.jsx("span", { className: "sc-shutter is-scan", role: "status", "aria-label": "Ищем код", children: n.jsx("i", {}) })
+                      : n.jsx("button", { type: "button", className: "sc-shutter", "aria-label": "Снять", disabled: !!c.busy, onClick: () => (mode === "plate" ? m.shoot() : scAnalyze(c, mode)) }),
+                    n.jsx(ScFlash, { on: c.flash, set: c.setFlash, cls: "sc-glass" }),
+                  ],
                 }),
               ],
             }),
