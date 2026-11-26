@@ -118,6 +118,7 @@ var SC_IC = {
   retake: "M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4",
   trash: "M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13",
   camera: "M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+  camPlus: "M3 8h3l2-3h6l2 3h1M21 13v6H3V8M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM20 3v6M17 6h6",
 };
 function ScI({ n: name, s = 22, w = 1.9 }) {
   return n.jsx("svg", {
@@ -263,7 +264,7 @@ function ScResult({ kind, meal: m0, onBack, onDone, shots }) {
 }
 
 /* ---------- мультифото: до 3 фото еды (решение владельца 2026-11-26) ----------
- * Сценарий: снял → «Готово» → просмотр (хаб) → «Снять ещё» / «Из галереи» →
+ * Сценарий: снял → сразу просмотр → «Разобрать» (главное) или «камера+» → ещё фото →
  * снова просмотр → у любого фото «Переснять» / «Заменить из галереи» / «Удалить» →
  * «Разобрать N фото» → один список продуктов со всех фото (у продукта — «фото N»).
  * Демо: у каждой картинки свой набор продуктов. Не из DS: стопка, слоты, просмотр. */
@@ -391,10 +392,10 @@ function ScPreview({ m, onAnalyze, onExit }) {
                 ),
               ),
               m.left > 0 &&
-                n.jsx("button", { type: "button", className: "sc-thumb is-add", "aria-label": `Добавить ещё фото, можно ещё ${m.left}`, onClick: () => m.setView(null), children: n.jsx(ScI, { n: "plus", s: 22 }) }),
+                n.jsx("button", { type: "button", className: "sc-thumb is-add", "aria-label": "Снять ещё фото — откроется камера", onClick: () => m.setView(null), children: n.jsx(ScI, { n: "camPlus", s: 24 }) }),
             ],
           }),
-          n.jsx("button", { type: "button", className: "sc-go", onClick: onAnalyze, children: m.shots.length === 1 ? "Разобрать" : `Разобрать ${m.shots.length} фото` }),
+          n.jsx("button", { type: "button", className: "sc-go", onClick: onAnalyze, children: "Разобрать" }),
         ],
       }),
     ],
@@ -573,7 +574,9 @@ function ScTabs({ meal, onClose, onDone }) {
   const c = useScCam(),
     m = useScShots(),
     close = () => (m.shots.length ? m.setConfirm(!0) : onClose()),
-    [mode, setMode] = V.useState("plate"),
+    [mode, setModeRaw] = V.useState("plate"),
+    /* прототип: настоящей камеры нет — «в кадре» то, что соответствует режиму */
+    setMode = (k) => (setModeRaw(k), c.setScene(k === "code" ? "barcode" : k)),
     code = c.scene === "barcode" || c.scene === "qr",
     want = mode === "code" ? code : mode === c.scene,
     [miss, setMiss] = V.useState(!1);
@@ -611,7 +614,6 @@ function ScTabs({ meal, onClose, onDone }) {
                 m.shots.length
                   ? n.jsx("button", { type: "button", className: "sc-glass", "aria-label": "Назад к снятым фото", onClick: () => (m.setView("preview"), m.retakeCancel && m.retakeCancel()), children: n.jsx(ScI, { n: "back", s: 20 }) })
                   : n.jsx("button", { type: "button", className: "sc-glass", "aria-label": "Закрыть", onClick: close, children: n.jsx(ScI, { n: "close", s: 20 }) }),
-                n.jsx(ScDemoPill, { scene: c.scene, setScene: c.setScene }),
                 n.jsx("span", { className: "sc-glass ghost" }),
               ],
             }),
