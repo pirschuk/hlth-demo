@@ -437,60 +437,6 @@
   background: #c9d3ea;
 }
 
-/* ---------- галерея ---------- */
-.sc-gal-wrap {
-  position: absolute;
-  z-index: 8;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  background: #0007;
-}
-.sc-gal {
-  width: 100%;
-  padding: 16px 16px 40px;
-  border-radius: 28px 28px 0 0;
-  background: #1b1d22;
-  animation: sc-up 0.25s ease-out;
-}
-.sc-gal-h {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.sc-gal-h b {
-  font-size: 17px;
-}
-.sc-gal-h button {
-  height: 36px;
-  padding: 0 6px;
-  color: #8fb0ff !important;
-  font-weight: 600 !important;
-}
-.sc-gal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-}
-.sc-gal-grid button {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #333;
-}
-.sc-gal-grid img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.sc-gal-grid .sc-scene {
-  transform: scale(0.42);
-  inset: -70%;
-  background: #6b5e50;
-}
-
 /* ===== 1 · Просто наведи ===== */
 .sc-auto-hint {
   position: absolute;
@@ -923,18 +869,6 @@
 .sc-row > :last-child {
   justify-self: end;
 }
-.sc-galbtn {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 0 2px #ffffffd9;
-}
-.sc-galbtn img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 .sc-tabs .sc-shutter {
   width: 76px;
   height: 76px;
@@ -1072,29 +1006,6 @@
 .sc-go:active {
   transform: scale(0.98);
 }
-/* галерея: выбор нескольких */
-.sc-gal .sc-cta {
-  width: 100%;
-  margin-top: 14px;
-}
-.sc-gal-grid button[aria-pressed="true"] {
-  box-shadow: inset 0 0 0 3px var(--sc-blue);
-}
-.sc-gal-n {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--sc-blue);
-  color: #fff;
-  font-style: normal;
-  font-size: 13px;
-  font-weight: 700;
-}
 /* результат по нескольким фото */
 .sc-res-shots {
   display: flex;
@@ -1162,4 +1073,64 @@
   border-radius: 26px;
   color: #ff8a8a !important;
   font-weight: 700 !important;
+}
+
+/* выход с неразобранными фото — шторка (раньше общая с галереей) */
+.sc-gal-wrap {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  background: #0007;
+}
+.sc-gal {
+  width: 100%;
+  padding: 16px 16px 40px;
+  border-radius: 28px 28px 0 0;
+  background: #1b1d22;
+  animation: sc-up 0.25s ease-out;
+}
+/* неудача кода / этикетки */
+.sc-fail {
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+.sc-fail-ic {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 4px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #e9f0ff;
+  color: var(--sc-blue);
+}
+.sc-fail h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+.sc-fail p {
+  margin: 0 0 10px;
+  max-width: 300px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--sc-mute);
+}
+.sc-fail .sc-cta {
+  width: 100%;
+}
+.sc-sec {
+  width: 100%;
+  height: 52px;
+  border-radius: 26px;
+  background: #fff;
+  color: var(--sc-blue) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+.sc-prev-img.is-label .sc-scene {
+  position: absolute;
 }

@@ -17386,6 +17386,47 @@ function gg() {
                   n.jsxs("label", {
                     className: "panel-label",
                     children: [
+                      "Камера · код",
+                      n.jsx("select", {
+                        "aria-label": "Камера · код",
+                        value: c.controls.camCode ?? "found",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.camCode = h.target.value;
+                          }),
+                        children: [
+                          ["found", "Штрихкод в базе"],
+                          ["qr", "QR «Честного знака»"],
+                          ["notfound", "Кода нет в базе"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
+                      "Камера · этикетка",
+                      n.jsx("select", {
+                        "aria-label": "Камера · этикетка",
+                        value: c.controls.camLabel ?? "ok",
+                        onChange: (h) =>
+                          k((g) => {
+                            g.camLabel = h.target.value;
+                          }),
+                        children: [
+                          ["ok", "Прочиталась"],
+                          ["bad", "Не прочиталась"],
+                        ].map(([h, g]) =>
+                          n.jsx("option", { value: h, children: g }, h),
+                        ),
+                      }),
+                    ],
+                  }),
+                  n.jsxs("label", {
+                    className: "panel-label",
+                    children: [
                       "Блок «Обычно на…»",
                       n.jsx("select", {
                         "aria-label": "Блок «Обычно на…»",
