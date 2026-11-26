@@ -847,3 +847,296 @@
 .keyboard-visible .sc-tray .sc-window {
   flex-basis: 30%;
 }
+
+/* ===== мультифото (до 3) ===== */
+.sc-count {
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: #0008;
+  font-size: 13px;
+  font-weight: 600;
+}
+.sc-stack {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px #fff;
+}
+.sc-stack img {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+}
+.sc-stack::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 14px;
+  background: #ffffff59;
+  transform: rotate(-8deg) translate(-3px, 2px);
+}
+.sc-stack b {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--sc-blue);
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 0 0 2px #000;
+}
+.sc-done {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--sc-blue);
+  color: #fff !important;
+}
+.sc-done small {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 12px;
+}
+.sc-shutter:disabled {
+  opacity: 0.35;
+}
+.sc-blink {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #fff;
+  opacity: 0.7;
+  pointer-events: none;
+}
+/* просмотр */
+.sc-prev {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px 34px;
+  background: #0b0c0f;
+}
+.sc-prev-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sc-prev-top b {
+  font-size: 17px;
+}
+.sc-prev-img {
+  flex: 1;
+  min-height: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #1b1d22;
+}
+.sc-prev-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: sc-fade 0.2s ease-out;
+}
+@keyframes sc-fade {
+  from {
+    opacity: 0.3;
+  }
+}
+.sc-prev-acts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.sc-prev-acts button {
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ffffff17;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+.sc-prev-acts button:last-child {
+  color: #ff8a8a !important;
+}
+.sc-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.sc-slot {
+  position: relative;
+  height: 76px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff12;
+}
+.sc-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+}
+.sc-slot[aria-selected="true"] {
+  box-shadow: inset 0 0 0 3px #fff;
+}
+.sc-slot[aria-selected="true"] img {
+  opacity: 1;
+}
+.sc-slot i {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #000a;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+}
+.sc-slot.is-void {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1.5px dashed #ffffff4d;
+  background: transparent;
+}
+.sc-slot.is-void button {
+  display: grid;
+  place-items: center;
+  color: #ffffffcc !important;
+}
+.sc-slot.is-void button + button {
+  border-left: 1px dashed #ffffff33;
+}
+.sc-prev-hint {
+  margin: -2px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #ffffff99;
+}
+/* галерея: выбор нескольких */
+.sc-gal .sc-cta {
+  width: 100%;
+  margin-top: 14px;
+}
+.sc-gal-grid button[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 3px var(--sc-blue);
+}
+.sc-gal-n {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--sc-blue);
+  color: #fff;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+}
+/* результат по нескольким фото */
+.sc-res-shots {
+  display: flex;
+  gap: 6px;
+}
+.sc-res-shots span {
+  position: relative;
+  width: 64px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sc-res-shots img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sc-res-shots i {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #000a;
+  color: #fff;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+}
+.sc-ph {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #eef2fb;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sc-mute);
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+/* выход с неразобранными фото */
+.sc-leave {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+.sc-leave b {
+  font-size: 19px;
+}
+.sc-leave p {
+  margin: 0 0 8px;
+  color: #ffffff99;
+  font-size: 14px;
+}
+.sc-leave .sc-cta {
+  margin-top: 0;
+}
+.sc-ghost {
+  height: 52px;
+  border-radius: 26px;
+  color: #ff8a8a !important;
+  font-weight: 700 !important;
+}
+.sc-slots {
+  flex-shrink: 0;
+  grid-auto-rows: 76px;
+}
+.sc-slot.is-void {
+  height: 76px;
+  align-self: start;
+}
+.sc-prev-acts,
+.sc-prev-hint,
+.sc-prev .sc-cta {
+  flex-shrink: 0;
+}
