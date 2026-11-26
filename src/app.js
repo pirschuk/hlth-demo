@@ -22710,6 +22710,12 @@ function Bg() {
         N.update((G) => {
           (G.controls.scale = 1), (G.controls.delay = 0);
         });
+      /* ?c.<переключатель>=<значение> — сразу выставить переключатели панели (ссылки для владельца) */
+      const ctl = [...h.entries()].filter(([k]) => k.startsWith("c."));
+      ctl.length &&
+        N.update((G) => {
+          ctl.forEach(([k, v]) => void (G.controls[k.slice(2)] = v));
+        });
     }, []),
     V.useEffect(() => {
       if (
