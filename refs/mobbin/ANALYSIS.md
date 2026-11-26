@@ -57,3 +57,11 @@
 - `8-error-ikea-card-inline.jpg` — ошибка в карточке, рядом рабочее действие.
 - `8-offline-alltrails-bar.jpg`, `8-stale-larq-offline.jpg` — режим офлайн / устаревшие данные помечены.
 - `8-error-chopt-toast-retry.jpg` — плашка «Something went wrong · Retry» поверх контента.
+
+## 9. Мультифото до 3 (2026-11-26)
+- `9-multi-thumbtack-3-slots.jpg` — 3 слота над затвором, «×», «✓».
+- `9-multi-vestiaire-numbered-slots.jpg` — нумерованные слоты.
+- `9-multi-ebay-1-of-24.jpg` — счётчик и подсказка, что снять следующим.
+- `9-multi-freeform-stack-badge.jpg` — стопка с бейджем у затвора.
+- `9-multi-dropbox-review-add-page.jpg` — просмотр: «Retake» / «Add page».
+- `9-multi-alan-more-pages.jpg` — «ещё страницы» вторичным действием.
